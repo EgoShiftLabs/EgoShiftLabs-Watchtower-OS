@@ -27,6 +27,7 @@ try{
  await page.locator('#i-effect').fill("Possible change in supply cost");
  await page.locator('#i-mechanism').fill("A smaller supply may increase market clearing prices if demand stays constant.");
  await page.locator('#i-falsifier').fill("Additional available capacity offsets the original shortage.");
+ console.log("Causal form validation:",JSON.stringify(await page.locator("#recordForm").evaluate(f=>({valid:f.checkValidity(),invalid:[...f.elements].filter(x=>x.willValidate&&!x.checkValidity()).map(x=>({name:x.name,value:x.value,message:x.validationMessage,tag:x.tagName}))}))));
  await page.locator('#recordForm button[type="submit"]').click();
  console.log("Causal form diagnostics:",JSON.stringify({
   notification:await page.locator("#toast").innerText(),
