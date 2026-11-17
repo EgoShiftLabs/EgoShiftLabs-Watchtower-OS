@@ -37,3 +37,13 @@ test("evidence grade never means externally verified",()=>{
 test("unknown top-level backup properties are rejected",()=>{
  const x=blankWorkspace();x.unexpected={admin:true};assert.equal(validWorkspace(x),false);
 });
+
+test("changed original creation timestamp or classification is detected",()=>{
+ const x=createForecastRecord({id:"p",demo:false,question:"Will benchmark reach specified threshold?",targetDate:"2027-03-01",probability:20,sourceType:"primary",resolutionRule:"Use official exchange settlement report.",disconfirming:"Closing value falls below the threshold."},new Date("2026-11-17T15:00:00Z"));
+ assert.equal(forecastIntegrity(x).ok,true);
+ assert.equal(forecastIntegrity({...x,createdAt:"2026-11-10T15:00:00Z"}).status,"mismatch");
+ assert.equal(forecastIntegrity({...x,sourceType:"unverified"}).status,"mismatch");
+ const y=resolveForecast(x,1,"A dated official source confirms the event.",new Date("2027-02-01T15:00:00Z"));
+ assert.equal(forecastIntegrity(y).ok,true);
+ assert.equal(forecastIntegrity({...y,outcome:0}).status,"mismatch");
+});
