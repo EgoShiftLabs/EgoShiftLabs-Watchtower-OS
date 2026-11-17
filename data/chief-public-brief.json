@@ -1,6 +1,6 @@
 {
   "schema": "watchtower-chief-brief-v1",
-  "generatedAt": "2026-11-17T16:18:30.645Z",
+  "generatedAt": "2026-11-17T17:34:59.889Z",
   "status": "public-only",
   "title": "CHIEF Public Intelligence Digest",
   "items": [
@@ -30,7 +30,7 @@
       "observationDate": "2026-11-17",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "finding": "12 events",
+      "finding": "13 events",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     },
