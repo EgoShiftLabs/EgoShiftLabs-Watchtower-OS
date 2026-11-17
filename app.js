@@ -1,6 +1,7 @@
 import {VERSION,SCHEMA,DOMAINS,ROLES,MODULES,esc,text,safeUrl,uid,isDate,freshness,sourceQuality,evidenceGrade,forecastIntegrity,createForecastRecord,brier,calibration,validateForecast,resolveForecast,scenarioWeighted,blankWorkspace,validWorkspace} from "./core.js";
 import {DEMO} from "./seed.js";
-import {safeSeries,csvPricePoints} from "./analytics.js";
+import {safeSeries,csvPricePoints,normalizePoints} from "./analytics.js";
+import {bindThreshold,evaluateThreshold,validateThresholdBinding,thresholdQuestion,templateOptions,COMPARATORS} from "./thresholds.js";
 import {renderEnergy,renderPatterns,renderCausal,renderChief,chiefMarkdown} from "./intelligence-ui.js";
 
 const KEY="watchtower-os-public-v1";
@@ -124,12 +125,15 @@ let result="";if(s.bull&&s.base&&s.bear){const x=scenarioWeighted(["bull","base"
 return '<div class="panel mt" id="scenarioStudio"><div class="panel-title"><h2>Scenario Studio</h2>'+tag("USER ASSUMPTIONS","amber")+'</div><p class="panel-sub">Use the energy market as a hypothetical example—or substitute your own research question. Enter three conditional outcomes and weights totaling 100%. The system does not assign or calibrate these weights.</p><form id="scenarioForm"><div class="scenario-row head"><span>Conditional scenario</span><span>Weight %</span><span>Impact %</span></div>'+rows+'<div class="form-foot"><button type="submit" class="btn btn-primary">Calculate & save scenario</button></div></form>'+result+'</div>';
 }
 function renderForecast(){const w=work(),cal=calibration(w.forecasts),open=[...w.forecasts].filter(f=>f.status!=="resolved"),closed=[...w.forecasts].filter(f=>f.status==="resolved");
-const cards=arr=>recordList(arr,f=>'<article class="item"><div class="item-body"><div class="badge-row">'+flag(f)+' '+tag(f.status==="resolved"?"RESOLVED":"PENDING",f.status==="resolved"?"green":"amber")+'</div><h3 class="mt">'+esc(f.question)+'</h3><p>'+esc(f.rationale||"No rationale recorded.")+'</p><div class="item-meta">Resolution deadline '+esc(formatDate(f.targetDate))+' · '+(f.probability===null||f.probability===""?"No probability entered":"Human estimate: "+esc(f.probability)+"%")+'</div>'+'<div class="item-meta">Evidence: '+gradeTag(f)+' · Integrity: '+esc(forecastIntegrity(f).status)+'</div>'+(f.status==="resolved"?'<p class="mt"><b>Observed outcome:</b> '+(f.outcome===1?"YES":"NO")+' · Brier: '+(f.brier==null?"Unscored":Number(f.brier).toFixed(3))+'</p>':"")+'</div><div class="item-actions">'+btn("Inspect","view-forecast",f.id,"btn-sm btn-ghost")+(f.status!=="resolved"?btn("Resolve","resolve-forecast",f.id,"btn-sm"):"")+'</div></article>',"Nothing recorded here yet.");
-return header("FORECAST ENGINE / OUTCOME ACCOUNTABILITY","Forecast lab.","Make falsifiable predictions, model conditional scenarios and compare what you expected with what actually happened.",btn("＋ Create forecast","add-forecast","","btn-primary"))+modeNote()+
+const cards=arr=>recordList(arr,f=>'<article class="item"><div class="item-body"><div class="badge-row">'+flag(f)+' '+tag(f.status==="resolved"?"RESOLVED":"PENDING",f.status==="resolved"?"green":"amber")+'</div><h3 class="mt">'+esc(f.question)+'</h3><p>'+esc(f.rationale||"No rationale recorded.")+'</p><div class="item-meta">Resolution deadline '+esc(formatDate(f.targetDate))+' · '+(f.probability===null||f.probability===""?"No probability entered":"Human estimate: "+esc(f.probability)+"%")+'</div>'+'<div class="item-meta">Evidence: '+gradeTag(f)+' · Integrity: '+esc(forecastIntegrity(f).status)+'</div>'+(f.binding?'<div class="item-meta">OFFICIAL-SERIES THRESHOLD · '+esc(f.binding.seriesLabel)+' · '+esc(f.binding.comparator)+' '+esc(f.binding.threshold)+' '+esc(f.binding.unit)+' · Persistence: '+(f.binding.persistenceCall?"YES":"NO")+' (not odds)</div>':'')+
+(f.status==="resolved"?'<p class="mt"><b>Observed outcome:</b> '+(f.outcome===1?"YES":"NO")+' · Human Brier: '+(f.brier==null?"Unscored":Number(f.brier).toFixed(3))+(f.binding?' · Persistence baseline: '+(f.baselineCorrect===1?"CORRECT":f.baselineCorrect===0?"INCORRECT":"NOT CHECKED"):'')+'</p>':"")+'</div><div class="item-actions">'+btn("Inspect","view-forecast",f.id,"btn-sm btn-ghost")+(f.status!=="resolved"?btn("Resolve","resolve-forecast",f.id,"btn-sm"):"")+'</div></article>',"Nothing recorded here yet.");
+return header("FORECAST ENGINE / OUTCOME ACCOUNTABILITY","Forecast lab.","Make falsifiable predictions, model conditional scenarios and compare what you expected with what actually happened.",btn("＋ Source-linked forecast","new-threshold","","btn-primary")+btn("＋ General forecast","add-forecast"))+modeNote()+
 '<div class="grid metrics mt">'+stat("PENDING FORECASTS",String(open.length),"Awaiting observable outcomes","⌁")+stat("OVERDUE / REAL",String(cal.overdue),"Past-deadline unresolved outcomes","⌁")+stat("LOCALLY SCORED",String(cal.count),"Self-reported outcomes; unscored: "+cal.unscored,"◈")+stat("MEAN BRIER SCORE",cal.mean==null?"—":cal.mean.toFixed(3),"50% reference: "+(cal.referenceMean===null?"—":"0.250")+"; n="+cal.count,"◎")+'</div>'+
 note('<b>Forecast integrity:</b> New records keep an original snapshot and event history, enforced by the app; browser storage and JSON exports are NOT tamper-proof. Probabilities remain subjective human estimates, and a fixed 50% reference is not a calibrated base-rate model.')+
 '<div class="panel mt"><div class="panel-title"><h2>Resolution discipline</h2>'+tag("NO VERIFIED PREDICTOR","amber")+'</div><div class="grid three">'+stat("EXPIRED UNRESOLVED",String(cal.overdue),"Backlog reduces confidence in skill claims","⌛")+stat("RESOLVED BUT UNSCORED",String(cal.unscored),"Legacy, incomplete or integrity issues","⚠")+stat("50% REFERENCE",cal.referenceMean===null?"—":cal.referenceMean.toFixed(3),"Uninformed baseline; same scored questions","◉")+'</div><p class="small mt">Resolution coverage (scored records vs overdue backlog): '+(cal.resolutionRate===null?"Insufficient records":Math.round(cal.resolutionRate*100)+"%")+'. This is not an evaluation of forecasting skill; proper comparison needs baseline frequencies and enough independently resolved outcomes.</p></div>'+
-'<div class="grid wide-split mt">'+block("Forecast register",'<h3>Open hypotheses</h3>'+cards(open)+'<div class="line"></div><h3>Resolved and scored</h3>'+cards(closed))+
+'<div class="panel mt"><div class="panel-title"><h2>Official-source threshold templates</h2>'+tag("FIRST OBSERVATION RULE","green")+'</div><p class="panel-sub">Choose a verified dated public series, pick your own threshold and deadline, state a subjective probability and countercase. The baseline simply assumes the latest observed value persists. It does NOT supply calibrated odds.</p>'+
+ (eligibleForecastSeries().length?'<div class="grid two mt">'+eligibleForecastSeries().map(s=>{const v=normalizePoints(s.points).at(-1);return '<div class="item"><div class="item-body"><h3>'+esc(s.label)+'</h3><p>Latest dated value: '+esc(v.value)+' '+esc(s.unit)+' on '+esc(v.date)+'</p><div class="item-meta">Retrieved '+esc(publicHistory.retrievedAt)+'</div></div>'+btn("Set a threshold","new-threshold",s.id,"btn-sm")+'</div>';}).join("")+'</div>':'<div class="empty mt">No recent official-series history is available to create a source-linked forecast. General forecasts remain possible.</div>')+'</div>'+
+ '<div class="grid wide-split mt">'+block("Forecast register",'<h3>Open hypotheses</h3>'+cards(open)+'<div class="line"></div><h3>Resolved and scored</h3>'+cards(closed))+
 block("Forecasting checklist",'<div class="card-list">'+[
 "Write a binary outcome with a firm deadline.","Set a public, objective YES / NO resolution rule.","Record disconfirming evidence and counterarguments.","Attach real sources, dates and stale-data checks.","Do not change original estimates after the outcome.","Score each resolved forecast and inspect calibration by sample size."].map((s,i)=>'<div class="item"><div class="item-body"><div class="kicker">'+String(i+1).padStart(2,"0")+'</div><p>'+s+'</p></div></div>').join("")+'</div><p class="small mt"><a class="text-link" href="docs/FORECASTING.md" target="_blank" rel="noopener noreferrer">Read forecasting standard ↗</a></p>')+'</div>'+scenarioStudio();
 }
@@ -174,6 +178,88 @@ area("Source evidence and context","evidence",a.evidence||"","At least 20 charac
 area("Potential implications","implication",a.implication||"","Separate fact from interpretation.")+
 area("Review or escalation trigger","trigger",a.trigger||"","What observable change would cause a reassessment?"),
 a.id));}
+function datePlus(n){const d=new Date();d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);}
+function eligibleForecastSeries(){
+ if(publicHistory.status!=="active"||!publicHistory.retrievedAt||Date.now()-new Date(publicHistory.retrievedAt).getTime()>72*3600000)return [];
+ return (publicHistory.series||[]).filter(x=>{
+  if(!safeSeries(x)||x.id==="eia-wti-spot"&&publicHistory.energy?.status!=="active")return false;
+  const last=normalizePoints(x.points).at(-1);
+  return last&&Date.now()-new Date(last.date+"T00:00:00Z").getTime()<15*86400000;
+ });
+}
+function thresholdForm(seriesId=""){
+ const eligible=eligibleForecastSeries(),chosen=eligible.find(s=>s.id===seriesId)||eligible[0];
+ if(!chosen){modal("Source-linked forecast unavailable","No recent eligible official time series has been published.",note("Refresh the official data collection first. No synthetic values, expired data, or unverified local CSV are accepted as official forecast evidence.","warning")+'<div class="form-foot">'+btn("Close","close-modal")+'</div>');return;}
+ const last=normalizePoints(chosen.points).at(-1);
+ const presets=templateOptions(chosen);
+ modal("Create official-series threshold forecast","The numerical threshold and human probability are yours; the official source is locked at creation.",
+ '<div class="note"><b>Original observation:</b> '+esc(chosen.label)+' — '+esc(last.value)+' '+esc(chosen.unit)+' on '+esc(last.date)+
+ '.<br>Last collection: '+esc(publicHistory.retrievedAt)+'. This does NOT estimate future probability.</div>'+
+ '<form id="thresholdForm" data-series-id="'+esc(chosen.id)+'"><div class="form-grid mt">'+
+ select("Official time series","seriesId",eligible.map(s=>[s.id,s.label]),chosen.id)+
+ field("Forecast target date","targetDate",datePlus(7),"Future date; the first official observation on/after this date decides the outcome.","date",true)+
+ select("Test condition","comparator",COMPARATORS,"gte")+
+ field("Threshold ("+chosen.unit+")","threshold",String(last.value),"This is the user's selected threshold, not a model-proposed price.","number",true,'step="any"')+
+ select("Illustrative threshold shortcuts","thresholdPreset",[["","Custom threshold"],...presets.map(x=>[String(x.value),x.label])],"")+
+ field("Your subjective probability (%)","probability","","Optional. NOT an algorithm-generated probability.","number",false,'min="0" max="100" step="1"')+
+ area("Evidence / reasoning","rationale","","Why might the future observation pass or fail this threshold?")+
+ area("Disconfirming observations","disconfirming","","At least 10 characters: what could prove your expectation wrong?")+
+ '</div>'+note("The resolution rule is fixed: FIRST official observation on or after the target date, within 7 calendar days. If no record appears, the forecast stays unresolved and requires documented adjudication.","warning")+
+ '<div class="form-foot">'+btn("Cancel","close-modal")+'<button class="btn btn-primary" type="submit">Lock original forecast</button></div></form>');
+}
+function saveThreshold(form){
+ const fd=new FormData(form),series=eligibleForecastSeries().find(x=>x.id===text(fd.get("seriesId"))),day=text(fd.get("targetDate"));
+ if(!series)return toast("Chosen official source is unavailable or stale; no forecast was created.",true);
+ const t=text(fd.get("threshold"));const candidate=bindThreshold(series,day,t,text(fd.get("comparator")));
+ if(candidate.error)return toast(candidate.error,true);
+ const b=candidate.binding,prob=text(fd.get("probability")),last=normalizePoints(series.points).at(-1);
+ const f={id:uid("f"),demo:false,question:thresholdQuestion(b),targetDate:day,probability:prob===""?null:Number(prob),
+  sourceUrl:series.sourceUrl,sourceType:"primary",sourceCheckedAt:today(),
+  evidence:"Source-linked original observation: "+last.date+", "+last.value+" "+series.unit+"; retrieved "+publicHistory.retrievedAt,
+  rationale:text(fd.get("rationale"),1800),disconfirming:text(fd.get("disconfirming"),1800),
+  resolutionRule:"First official "+series.label+" observation on or after "+day+" within 7 calendar days. Evaluate "+b.comparator+" "+b.threshold+" "+b.unit+".",
+  binding:b};
+ const error=validateForecast(f);if(error)return toast(error,true);
+ if(state.mode!=="live")state.mode="live";
+ const record=createForecastRecord(f);
+ state.live.forecasts.unshift(record);
+ if(!save()){state.live.forecasts.shift();return;}
+ closeModal();setView("forecast");toast("Official-series forecast locked with source snapshot and persistence baseline.");
+}
+function thresholdResolutionForm(id){
+ const f=work().forecasts.find(x=>x.id===id);
+ if(!f||!f.binding||f.status==="resolved")return toast("Unresolved source-linked forecast not found.",true);
+ if(!forecastIntegrity(f).ok||validateThresholdBinding(f.binding))return toast("Original forecast integrity failed. Cannot resolve.",true);
+ const series=(publicHistory.series||[]).find(x=>x.id===f.binding.seriesId);
+ const result=evaluateThreshold(f.binding,series);
+ const status=result.status==="ready"?"Official outcome found":"Awaiting source-backed outcome";
+ modal("Resolve official-series forecast",f.question,
+ '<div class="badge-row">'+tag(status,result.status==="ready"?"green":"amber")+'</div><div class="line"></div>'+
+ '<div class="kv"><span>Original dated observation</span><strong>'+esc(f.binding.originalObservationDate)+' · '+esc(f.binding.originalValue)+' '+esc(f.binding.unit)+'</strong></div>'+
+ '<div class="kv"><span>Threshold condition</span><strong>'+esc(f.binding.comparator)+' '+esc(f.binding.threshold)+' '+esc(f.binding.unit)+'</strong></div>'+
+ '<div class="kv"><span>Baseline at creation</span><strong>'+esc(f.binding.persistenceCall?"YES":"NO")+' (mechanical persistence, not probabilistic)</strong></div>'+
+ (result.status==="ready"?
+  '<div class="note mt"><b>First eligible dated observation:</b> '+esc(result.observationDate)+' — '+esc(result.value)+' '+esc(f.binding.unit)+
+  '<p>Under the PRE-RECORDED rule, the result is <b>'+esc(result.outcome?"YES":"NO")+'</b>. Verify the source before locking.</p></div>'+
+  '<p class="small mt"><a class="text-link" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(result.sourceUrl))+'">View original published source ↗</a></p>'+
+  '<form id="thresholdResolutionForm" data-id="'+esc(id)+'"><label class="check-option"><input type="checkbox" name="reviewed" required> I reviewed the dated official observation and confirm this rule-driven outcome.</label><div class="form-foot">'+btn("Cancel","close-modal")+'<button type="submit" class="btn btn-primary">Lock verified outcome</button></div></form>'
+ :note(esc(result.reason||result.error||"Official time series currently unavailable. This forecast stays open."),"warning")+
+ '<div class="form-foot">'+btn("Close","close-modal")+'</div>');
+}
+function saveThresholdResolution(form){
+ const id=form.dataset.id,f=work().forecasts.find(x=>x.id===id);
+ if(!f?.binding||f.status==="resolved")return toast("Forecast is no longer open.",true);
+ const series=(publicHistory.series||[]).find(x=>x.id===f.binding.seriesId);
+ const r=evaluateThreshold(f.binding,series);
+ if(r.status!=="ready"||!new FormData(form).has("reviewed"))return toast("Outcome source review incomplete.",true);
+ const resolved=resolveForecast(f,r.outcome,"Official series "+f.binding.seriesId+" value "+r.value+" "+f.binding.unit+" on "+r.observationDate+"; threshold "+f.binding.comparator+" "+f.binding.threshold);
+ if(resolved.error)return toast(resolved.error,true);
+ resolved.outcomeUrl=r.sourceUrl;resolved.outcomeObservationDate=r.observationDate;resolved.outcomeObservationValue=r.value;
+ resolved.baselineCall=f.binding.persistenceCall;resolved.baselineCorrect=r.baselineCorrect;resolved.resolutionSourceAt=publicHistory.retrievedAt;
+ const idx=work().forecasts.indexOf(f);work().forecasts[idx]=resolved;
+ if(!save()){work().forecasts[idx]=f;return;}
+ closeModal();render();toast("Official threshold outcome recorded. Human Brier and mechanical persistence are tracked separately.");
+}
 function editForecast(){modal("Create falsifiable forecast","Original predictions are frozen once saved; create a new forecast to revise your estimate.",formWrap("forecasts",
 field("Outcome question","question","","E.g., Will benchmark X exceed Y on a specific date?","text",true)+
 field("Outcome / resolution deadline","targetDate","","The date by which YES/NO will be assessed.","date",true)+
@@ -201,11 +287,11 @@ select("Priority","priority",[["low","Low"],["medium","Medium"],["high","High"]]
 select("Status","status",[["planning","Planning"],["active","Active"],["paused","Paused"],["complete","Complete"]],a.status||"planning")+
 area("Next action","nextAction",a.nextAction||"","Describe an actionable checkpoint."),a.id));}
 function detail(kind,id){const a=work()[kind]?.find(x=>x.id===id);if(!a)return toast("Record not found",true);const rows=kind==="forecasts"?[
-["Question",a.question],["Forecast created",a.createdAt],["Target date",a.targetDate],["Original human estimate",a.probability==null?"NOT ENTERED":a.probability+"%"],["Original resolution rule",a.resolutionRule],["Supporting case",a.rationale],["Source evidence",a.evidence],["Source grade",evidenceGrade(a).label],["Record history",a.timeline?.map(x=>x.type+" @ "+x.at).join(" / ")||"Legacy record — no audit trail"],["Original integrity",forecastIntegrity(a).status],["Disconfirming evidence",a.disconfirming],["Outcome",a.status==="resolved"?(a.outcome===1?"YES":"NO"):"UNRESOLVED"],["Resolution record",a.outcomeEvidence],["Resolution date",a.resolvedAt],["Brier score",a.status==="resolved"&&a.brier!=null?a.brier.toFixed(3):"Not scored"]]:
+["Question",a.question],["Official-source binding",a.binding?JSON.stringify(a.binding):"General human forecast"],["Forecast created",a.createdAt],["Target date",a.targetDate],["Original human estimate",a.probability==null?"NOT ENTERED":a.probability+"%"],["Original resolution rule",a.resolutionRule],["Supporting case",a.rationale],["Source evidence",a.evidence],["Source grade",evidenceGrade(a).label],["Record history",a.timeline?.map(x=>x.type+" @ "+x.at).join(" / ")||"Legacy record — no audit trail"],["Original integrity",forecastIntegrity(a).status],["Disconfirming evidence",a.disconfirming],["Outcome",a.status==="resolved"?(a.outcome===1?"YES":"NO"):"UNRESOLVED"],["Resolution record",a.outcomeEvidence],["Resolution date",a.resolvedAt],["Brier score",a.status==="resolved"&&a.brier!=null?a.brier.toFixed(3):"Not scored"]]:
 kind==="signals"?[["Signal",a.title],["Domain",a.domain],["Observed",a.observedAt],["Evidence",a.evidence],["Implication",a.implication],["Trigger",a.trigger]]:
 [["Title",a.title],["Thesis",a.thesis],["Countercase",a.countercase],["Options",a.options],["Next action",a.nextAction],["Review date",a.reviewDate]];
 modal("Intelligence dossier",a.demo?"Fictional example — not real intelligence":"Manual, browser-local research record",'<div class="badge-row">'+flag(a)+' '+(sourceLink(a))+'</div><div class="line"></div>'+rows.map(([k,v])=>'<div class="kv"><span>'+esc(k)+'</span><strong>'+esc(v==null?"Not recorded":String(v))+'</strong></div>').join("")+'<div class="form-foot">'+btn("Close","close-modal")+'</div>');}
-function resolutionForm(id){const f=work().forecasts.find(x=>x.id===id);if(!f||f.status==="resolved")return toast("Unresolved forecast not found",true);
+function resolutionForm(id){const f=work().forecasts.find(x=>x.id===id);if(f?.binding)return thresholdResolutionForm(id);if(!f||f.status==="resolved")return toast("Unresolved forecast not found",true);
 modal("Resolve forecast",f.question, '<form id="resolutionForm" data-id="'+esc(id)+'"><div class="form-grid">'+
 select("Observed outcome","outcome",[["1","YES — event confirmed"],["0","NO — event did not happen by deadline"]],"1")+
 field("Resolution evidence source","outcomeUrl","","Public source URL for evidence","url")+
@@ -234,7 +320,7 @@ function download(name,raw,type="application/json"){const u=URL.createObjectURL(
 async function importFile(file){if(!file)return;if(file.size>1024*1024)return toast("Backup exceeds the 1 MB import limit",true);let next;try{next=JSON.parse(await file.text());}catch{return toast("This is not valid JSON",true);}if(!validWorkspace(next))return toast("Backup does not match this workspace schema",true);if(!confirm("Replace both your local and demo workspaces with this backup? Export first if necessary."))return;state=next;state.demo.scenario=state.demo.scenario||{};state.live.scenario=state.live.scenario||{};save();render();toast("Local backup imported.");}
 function handleAction(el){const x=el.dataset.action,id=el.dataset.id;switch(x){
 case"add-signal":editSignal();break;case"view-signal":detail("signals",id);break;
-case"add-forecast":editForecast();break;case"view-forecast":detail("forecasts",id);break;case"resolve-forecast":resolutionForm(id);break;
+case"add-forecast":editForecast();break;case"new-threshold":thresholdForm(id);break;case"view-forecast":detail("forecasts",id);break;case"resolve-forecast":resolutionForm(id);break;
 case"add-decision":editDecision();break;case"view-decision":detail("decisions",id);break;
 case"add-project":editProject();break;case"edit-project":editProject(id);break;
 case"add-causal":editCausal();break;
@@ -250,7 +336,17 @@ case"reset-demo":if(confirm("Restore fictional example records?")){state.demo=co
 case"clear-live":if(confirm("Permanently delete all LOCAL workspace entries from this browser? Export a backup first.")){state.live={signals:[],forecasts:[],decisions:[],projects:[],scenario:{},causal:[],localOil:null};save();render();toast("Local research deleted from this browser.");}break;
 }}
 document.addEventListener("click",e=>{const n=e.target.closest("[data-nav]");if(n){setView(n.dataset.nav);return;}const a=e.target.closest("[data-action]");if(a){if(a.dataset.action==="backdrop"&&e.target!==a)return;e.preventDefault();handleAction(a);}});
-modalRoot.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="recordForm")storeRecord(e.target);if(e.target.id==="resolutionForm")saveResolution(e.target);});
+modalRoot.addEventListener("change",e=>{
+ if(e.target.id==="i-thresholdPreset"&&e.target.value){const target=modalRoot.querySelector("#i-threshold");if(target)target.value=e.target.value;}
+ if(e.target.id==="i-seriesId"){
+  const s=eligibleForecastSeries().find(x=>x.id===e.target.value);
+  if(s){const last=normalizePoints(s.points).at(-1);const target=modalRoot.querySelector("#i-threshold");if(target)target.value=last.value;
+   const preset=modalRoot.querySelector("#i-thresholdPreset");
+   if(preset)preset.innerHTML='<option value="">Custom threshold</option>'+templateOptions(s).map(x=>'<option value="'+esc(x.value)+'">'+esc(x.label)+'</option>').join("");
+  }
+ }
+});
+modalRoot.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="recordForm")storeRecord(e.target);if(e.target.id==="resolutionForm")saveResolution(e.target);if(e.target.id==="thresholdForm")saveThreshold(e.target);if(e.target.id==="thresholdResolutionForm")saveThresholdResolution(e.target);});
 root.addEventListener("submit",e=>{e.preventDefault();const f=e.target;if(f.id==="scenarioForm")saveScenario(f);if(f.id==="profileForm"){const fd=new FormData(f);state.profile.label=text(fd.get("label"),80)||"Operator";state.profile.risk=text(fd.get("risk"),30);state.profile.focus=text(fd.get("focus"),500);save();render();toast("Local preferences updated.");}if(f.id==="moduleForm"){const fd=new FormData(f);state.profile.modules=["command","settings",...MODULES.filter(x=>!["command","settings"].includes(x[0])&&fd.get(x[0])==="on").map(x=>x[0])];save();render();toast("Navigation preferences saved.");}});
 root.addEventListener("change",async e=>{
  if(e.target.id==="importFile"){importFile(e.target.files?.[0]);e.target.value="";}
