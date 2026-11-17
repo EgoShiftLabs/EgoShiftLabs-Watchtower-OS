@@ -1,4 +1,4 @@
-import {VERSION,SCHEMA,DOMAINS,ROLES,MODULES,esc,text,safeUrl,uid,isDate,freshness,sourceQuality,brier,calibration,validateForecast,resolveForecast,scenarioWeighted,blankWorkspace,validWorkspace} from "./core.js";
+import {VERSION,SCHEMA,DOMAINS,ROLES,MODULES,esc,text,safeUrl,uid,isDate,freshness,sourceQuality,evidenceGrade,forecastIntegrity,createForecastRecord,brier,calibration,validateForecast,resolveForecast,scenarioWeighted,blankWorkspace,validWorkspace} from "./core.js";
 import {DEMO} from "./seed.js";
 
 const KEY="watchtower-os-public-v1";
@@ -9,6 +9,7 @@ const copy=x=>JSON.parse(JSON.stringify(x));
 const initial=()=>{const x=blankWorkspace();x.demo=copy(DEMO);x.demo.scenario={};x.live.scenario={};return x;};
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(validWorkspace(s)){s.demo.scenario=s.demo.scenario||{};s.live.scenario=s.live.scenario||{};return s;}}catch(e){console.warn("Local storage is unavailable",e);}return initial();}
 let state=load(),previousFocus=null,filter="",rendering=false;
+let publicIntel={schema:"watchtower-public-intel-v1",status:"loading",retrievedAt:null,observations:[]};
 function work(){return state[state.mode];}
 function activeView(){const v=location.hash.slice(1);return MODULES.some(m=>m[0]===v)?v:"command";}
 function formatDate(s){if(!s)return "Unscheduled";if(!isDate(s))return "Unknown";return new Date(s+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"});}
@@ -26,6 +27,7 @@ function select(label,name,options,value=""){return '<div class="field"><label f
 function stat(label,value,help,ico){return '<article class="stat"><span class="stat-icon">'+ico+'</span><div class="stat-label">'+esc(label)+'</div><div class="stat-value">'+esc(value)+'</div><div class="stat-help">'+esc(help)+'</div></article>';}
 function empty(msg){return '<div class="empty">'+msg+'</div>';}
 function flag(r){return r.demo?tag("FICTIONAL DEMO","amber"):tag("OWNER-ENTERED","blue");}
+function gradeTag(r){const g=evidenceGrade(r);return tag(g.label,g.tone)+(g.age&&g.age!=="not applicable"?' <span class="small">Source age: '+esc(g.age)+'</span>':"");}
 function sourceLink(r){return safeUrl(r.sourceUrl)?'<a class="text-link" href="'+esc(safeUrl(r.sourceUrl))+'" target="_blank" rel="noopener noreferrer">Original source ↗</a>':tag("NO SOURCE", "amber");}
 function riskTone(l){return l==="red"?"red":l==="orange"?"amber":l==="green"?"green":"blue";}
 function recordList(arr,renderer,nothing){return arr.length?'<div class="card-list">'+arr.map(renderer).join("")+'</div>':empty(nothing);}
@@ -39,6 +41,27 @@ document.getElementById("topDate").textContent=new Date().toLocaleDateString("en
 root.innerHTML=({command:renderCommand,watch:renderWatch,forecast:renderForecast,decisions:renderDecisions,projects:renderProjects,agents:renderAgents,settings:renderSettings}[view]||renderCommand)();
 }finally{rendering=false;}}
 
+function publicIntelPanel(){
+ const d=publicIntel,ready=d.status==="active",age=ready&&d.retrievedAt?((Date.now()-new Date(d.retrievedAt).getTime())/3600000):null;
+ const stale=age===null||!Number.isFinite(age)||age>48;
+ const status=d.status==="loading"?"LOADING":d.status==="unavailable"?"UNAVAILABLE":!ready?"NOT CONFIGURED":stale?"STALE SNAPSHOT":"PUBLIC DATA SNAPSHOT";
+ const observations=Array.isArray(d.observations)?d.observations.slice(0,8):[];
+ return '<section class="panel mt"><div class="panel-title"><h2>Public intelligence spine</h2>'+tag(status,ready&&!stale?"green":"amber")+'</div>'+
+ note("No AI inference or market advice is generated from this feed. Original source, observation date and retrieval time are required.")+
+ (ready?'<p class="small mt">Retrieved '+esc(new Date(d.retrievedAt).toLocaleString())+(stale?' · Snapshot too old for current conditions.':'')+'</p>':'<p class="panel-sub mt">The public data adapter is not connected yet. The published JSON explicitly shows an unconfigured state; no fabricated observations are supplied.</p>')+
+ (observations.length?'<div class="card-list mt">'+observations.map(x=>'<div class="item"><div class="item-body"><h3>'+esc(x.label)+'</h3><p>'+esc(x.value)+' '+esc(x.unit||"")+' · Observation '+esc(x.observationDate)+'</p><div class="item-meta">'+esc(x.sourceName||"Original source")+' · <a class="text-link" rel="noopener noreferrer" target="_blank" href="'+esc(safeUrl(x.sourceUrl))+'">Source ↗</a></div></div></div>').join("")+'</div>':'<div class="empty mt">No public observations available. A permitted, verified data source is not connected yet.</div>')+
+ '<p class="small mt"><a class="text-link" href="docs/PUBLIC_INTELLIGENCE.md" target="_blank" rel="noopener noreferrer">Read public-feed contract ↗</a></p></section>';
+}
+async function loadPublicIntel(){
+ try{
+  const response=await fetch("./data/public-intel.json",{cache:"no-store"});
+  if(!response.ok)throw Error("Feed unavailable");
+  const d=await response.json();
+  if(d?.schema!=="watchtower-public-intel-v1"||!["unconfigured","active","stale"].includes(d.status)||!Array.isArray(d.observations))throw Error("Unexpected data feed schema");
+  publicIntel={...d,observations:d.observations.filter(x=>x&&safeUrl(x.sourceUrl)&&isDate(x.observationDate)&&Number.isFinite(x.value)).slice(0,50)};
+ }catch(e){publicIntel={status:"unavailable",observations:[],retrievedAt:null};}
+ if(["watch","command"].includes(activeView()))render();
+}
 function renderCommand(){const w=work(),real=state.mode==="live",open=w.forecasts.filter(x=>x.status!=="resolved"),cal=calibration(w.forecasts),signalCount=w.signals.length,reviewDue=w.decisions.filter(x=>x.status==="open"&&isDate(x.reviewDate)&&x.reviewDate<=today()).length;
 const latest=[...w.signals].sort((a,b)=>(b.observedAt||"").localeCompare(a.observedAt||"")).slice(0,3);
 const top=[...w.forecasts].filter(x=>x.status!=="resolved").slice(0,2);
@@ -50,12 +73,12 @@ block("CHIEF / decision priorities",'<p class="panel-sub">The system is not curr
 recordList(top,r=>'<div class="item"><div class="item-body"><h3>'+esc(r.question)+'</h3><p>Target: '+esc(formatDate(r.targetDate))+' · '+(r.probability==null?"No probability entered":"User estimate "+esc(r.probability)+"%")+'</p></div></div>',"No unresolved forecasts.")+
 '<div class="line"></div><div class="kv"><span>Historical accuracy</span><strong>'+(cal.mean===null?"Not measurable":cal.mean.toFixed(3)+" mean Brier")+'</strong></div><p class="small">n = '+cal.count+' real resolved forecasts. This is not evidence of proven predictive skill.</p>',btn("Open Forecast Lab","go-forecast","","btn-sm btn-ghost"))+'</div>'+
 '<div class="section-line"><h2>Intelligence doctrine</h2><span>THE WATCHTOWER STANDARD</span></div><div class="grid three">'+[
-["01 / OBSERVE","Capture original evidence and relevant signals."],["02 / ANALYZE","Compare causes, timing, context and alternative explanations."],["03 / FORECAST","Specify an outcome, deadline and testable assumptions."],["04 / CHALLENGE","Record falsifiers and downside consequences."],["05 / DECIDE","Choose options based on constraints and goals."],["06 / LEARN","Resolve, score and improve future decisions."]].map(([n,d])=>'<div class="panel"><div class="kicker">'+n+'</div><p class="panel-sub">'+d+'</p></div>').join("")+'</div>';
+["01 / OBSERVE","Capture original evidence and relevant signals."],["02 / ANALYZE","Compare causes, timing, context and alternative explanations."],["03 / FORECAST","Specify an outcome, deadline and testable assumptions."],["04 / CHALLENGE","Record falsifiers and downside consequences."],["05 / DECIDE","Choose options based on constraints and goals."],["06 / LEARN","Resolve, score and improve future decisions."]].map(([n,d])=>'<div class="panel"><div class="kicker">'+n+'</div><p class="panel-sub">'+d+'</p></div>').join("")+'</div>'+publicIntelPanel();
 }
 
 function renderWatch(){const w=work(),sorted=[...w.signals].sort((a,b)=>(b.observedAt||"").localeCompare(a.observedAt||""));
 return header("SITUATION ROOM / SOURCE INTELLIGENCE","Global watch.","Track changing conditions across geopolitical, economic, technological and personal resilience domains.",btn("＋ Add source-backed signal","add-signal","","btn-primary"))+modeNote()+
-'<div class="grid wide-split mt">'+block("Intelligence signals",recordList(sorted,r=>'<article class="item"><div class="item-body"><div class="badge-row">'+flag(r)+' '+tag((r.level||"yellow").toUpperCase(),riskTone(r.level))+' '+tag(r.domain||"Other")+' '+(sourceQuality(r)?tag("SOURCE NOTED","green"):tag("VERIFICATION INCOMPLETE","amber"))+'</div><h3 class="mt">'+esc(r.title)+'</h3><p>'+esc(r.evidence||"No supporting evidence.")+'</p><div class="item-meta">'+esc(formatDate(r.observedAt))+' · '+esc(freshness(r.observedAt))+' · '+sourceLink(r)+'</div><p class="mt"><b>Potential implication:</b> '+esc(r.implication||"Not recorded")+'</p><p><b>Review trigger:</b> '+esc(r.trigger||"Not recorded")+'</p></div><div class="item-actions">'+btn("Review","view-signal",r.id,"btn-sm btn-ghost")+'</div></article>',"No verified or hypothetical signals in this workspace. Create a record and attach an original source."))+
+publicIntelPanel()+'<div class="grid wide-split mt">'+block("Intelligence signals",recordList(sorted,r=>'<article class="item"><div class="item-body"><div class="badge-row">'+flag(r)+' '+tag((r.level||"yellow").toUpperCase(),riskTone(r.level))+' '+tag(r.domain||"Other")+' '+gradeTag(r)+'</div><h3 class="mt">'+esc(r.title)+'</h3><p>'+esc(r.evidence||"No supporting evidence.")+'</p><div class="item-meta">'+esc(formatDate(r.observedAt))+' · '+esc(freshness(r.observedAt))+' · '+sourceLink(r)+'</div><p class="mt"><b>Potential implication:</b> '+esc(r.implication||"Not recorded")+'</p><p><b>Review trigger:</b> '+esc(r.trigger||"Not recorded")+'</p></div><div class="item-actions">'+btn("Review","view-signal",r.id,"btn-sm btn-ghost")+'</div></article>',"No verified or hypothetical signals in this workspace. Create a record and attach an original source."))+
 block("Source discipline",note('An observed event is not the same as a forecast. Record original URL, publication or observation date, relevant evidence, a competing interpretation and what change would merit another review.')+
 '<div class="line"></div><h3>Public research starting points</h3>'+[
 ["U.S. Energy Information Administration","https://www.eia.gov/"],["Federal Reserve FRED","https://fred.stlouisfed.org/"],["U.S. Bureau of Labor Statistics","https://www.bls.gov/"],["World Bank Data","https://data.worldbank.org/"],["NOAA","https://www.noaa.gov/"]].map(([name,url])=>'<div class="kv"><span>'+esc(name)+'</span><a class="text-link" target="_blank" rel="noopener noreferrer" href="'+url+'">Open ↗</a></div>').join("")+
@@ -66,10 +89,11 @@ let result="";if(s.bull&&s.base&&s.bear){const x=scenarioWeighted(["bull","base"
 return '<div class="panel mt" id="scenarioStudio"><div class="panel-title"><h2>Scenario Studio</h2>'+tag("USER ASSUMPTIONS","amber")+'</div><p class="panel-sub">Use the energy market as a hypothetical example—or substitute your own research question. Enter three conditional outcomes and weights totaling 100%. The system does not assign or calibrate these weights.</p><form id="scenarioForm"><div class="scenario-row head"><span>Conditional scenario</span><span>Weight %</span><span>Impact %</span></div>'+rows+'<div class="form-foot"><button type="submit" class="btn btn-primary">Calculate & save scenario</button></div></form>'+result+'</div>';
 }
 function renderForecast(){const w=work(),cal=calibration(w.forecasts),open=[...w.forecasts].filter(f=>f.status!=="resolved"),closed=[...w.forecasts].filter(f=>f.status==="resolved");
-const cards=arr=>recordList(arr,f=>'<article class="item"><div class="item-body"><div class="badge-row">'+flag(f)+' '+tag(f.status==="resolved"?"RESOLVED":"PENDING",f.status==="resolved"?"green":"amber")+'</div><h3 class="mt">'+esc(f.question)+'</h3><p>'+esc(f.rationale||"No rationale recorded.")+'</p><div class="item-meta">Resolution deadline '+esc(formatDate(f.targetDate))+' · '+(f.probability===null||f.probability===""?"No probability entered":"Human estimate: "+esc(f.probability)+"%")+'</div>'+(f.status==="resolved"?'<p class="mt"><b>Observed outcome:</b> '+(f.outcome===1?"YES":"NO")+' · Brier: '+(f.brier==null?"Unscored":Number(f.brier).toFixed(3))+'</p>':"")+'</div><div class="item-actions">'+btn("Inspect","view-forecast",f.id,"btn-sm btn-ghost")+(f.status!=="resolved"?btn("Resolve","resolve-forecast",f.id,"btn-sm"):"")+'</div></article>',"Nothing recorded here yet.");
+const cards=arr=>recordList(arr,f=>'<article class="item"><div class="item-body"><div class="badge-row">'+flag(f)+' '+tag(f.status==="resolved"?"RESOLVED":"PENDING",f.status==="resolved"?"green":"amber")+'</div><h3 class="mt">'+esc(f.question)+'</h3><p>'+esc(f.rationale||"No rationale recorded.")+'</p><div class="item-meta">Resolution deadline '+esc(formatDate(f.targetDate))+' · '+(f.probability===null||f.probability===""?"No probability entered":"Human estimate: "+esc(f.probability)+"%")+'</div>'+'<div class="item-meta">Evidence: '+gradeTag(f)+' · Integrity: '+esc(forecastIntegrity(f).status)+'</div>'+(f.status==="resolved"?'<p class="mt"><b>Observed outcome:</b> '+(f.outcome===1?"YES":"NO")+' · Brier: '+(f.brier==null?"Unscored":Number(f.brier).toFixed(3))+'</p>':"")+'</div><div class="item-actions">'+btn("Inspect","view-forecast",f.id,"btn-sm btn-ghost")+(f.status!=="resolved"?btn("Resolve","resolve-forecast",f.id,"btn-sm"):"")+'</div></article>',"Nothing recorded here yet.");
 return header("FORECAST ENGINE / OUTCOME ACCOUNTABILITY","Forecast lab.","Make falsifiable predictions, model conditional scenarios and compare what you expected with what actually happened.",btn("＋ Create forecast","add-forecast","","btn-primary"))+modeNote()+
-'<div class="grid metrics mt">'+stat("PENDING FORECASTS",String(open.length),"Awaiting observable outcomes","⌁")+stat("RESOLVED / REAL",String(cal.count),"Fictional outcomes excluded","◈")+stat("MEAN BRIER SCORE",cal.mean==null?"—":cal.mean.toFixed(3),"Lower is better; sample size matters","◎")+stat("LIVE PRICE PREDICTIONS","NONE","No validated forecasting model connected","⛨")+'</div>'+
-note('<b>Forecast integrity:</b> Probabilities are manually entered hypotheses, not machine-derived odds. Original forecasts cannot be silently edited after creation. This release has no live market feed or statistical predictive model.')+
+'<div class="grid metrics mt">'+stat("PENDING FORECASTS",String(open.length),"Awaiting observable outcomes","⌁")+stat("OVERDUE / REAL",String(cal.overdue),"Past-deadline unresolved outcomes","⌁")+stat("AUDIT-READY SCORED",String(cal.count),"Unscored resolved: "+cal.unscored,"◈")+stat("MEAN BRIER SCORE",cal.mean==null?"—":cal.mean.toFixed(3),"50% reference: "+(cal.referenceMean===null?"—":"0.250")+"; n="+cal.count,"◎")+'</div>'+
+note('<b>Forecast integrity:</b> New records keep an original snapshot and event history, enforced by the app; browser storage and JSON exports are NOT tamper-proof. Probabilities remain subjective human estimates, and a fixed 50% reference is not a calibrated base-rate model.')+
+'<div class="panel mt"><div class="panel-title"><h2>Resolution discipline</h2>'+tag("NO VERIFIED PREDICTOR","amber")+'</div><div class="grid three">'+stat("EXPIRED UNRESOLVED",String(cal.overdue),"Backlog reduces confidence in skill claims","⌛")+stat("RESOLVED BUT UNSCORED",String(cal.unscored),"Legacy, incomplete or integrity issues","⚠")+stat("50% REFERENCE",cal.referenceMean===null?"—":cal.referenceMean.toFixed(3),"Uninformed baseline; same scored questions","◉")+'</div><p class="small mt">Resolution coverage (scored records vs overdue backlog): '+(cal.resolutionRate===null?"Insufficient records":Math.round(cal.resolutionRate*100)+"%")+'. This is not an evaluation of forecasting skill; proper comparison needs baseline frequencies and enough independently resolved outcomes.</p></div>'+
 '<div class="grid wide-split mt">'+block("Forecast register",'<h3>Open hypotheses</h3>'+cards(open)+'<div class="line"></div><h3>Resolved and scored</h3>'+cards(closed))+
 block("Forecasting checklist",'<div class="card-list">'+[
 "Write a binary outcome with a firm deadline.","Set a public, objective YES / NO resolution rule.","Record disconfirming evidence and counterarguments.","Attach real sources, dates and stale-data checks.","Do not change original estimates after the outcome.","Score each resolved forecast and inspect calibration by sample size."].map((s,i)=>'<div class="item"><div class="item-body"><div class="kicker">'+String(i+1).padStart(2,"0")+'</div><p>'+s+'</p></div></div>').join("")+'</div><p class="small mt"><a class="text-link" href="docs/FORECASTING.md" target="_blank" rel="noopener noreferrer">Read forecasting standard ↗</a></p>')+'</div>'+scenarioStudio();
@@ -101,6 +125,7 @@ select("Domain","domain",DOMAINS.map(x=>[x,x]),a.domain||"Geopolitics")+
 select("Watch level","level",[["green","Green / routine"],["yellow","Yellow / emerging"],["orange","Orange / elevated"],["red","Red / urgent"]],a.level||"yellow")+
 field("Observed / published date","observedAt",a.observedAt||today(),"Record the actual event or source date.","date",true)+
 field("Primary source URL","sourceUrl",a.sourceUrl||"","Only official or otherwise attributable http(s) links.","url")+
+select("Source classification (self-reported)","sourceType",[["unverified","Unverified / uncertain"],["primary","Primary evidence"],["secondary","Secondary report"],["commentary","Interpretation / opinion"]],a.sourceType||"unverified")+
 area("Source evidence and context","evidence",a.evidence||"","At least 20 characters required to mark a signal sourced.")+
 area("Potential implications","implication",a.implication||"","Separate fact from interpretation.")+
 area("Review or escalation trigger","trigger",a.trigger||"","What observable change would cause a reassessment?"),
@@ -110,6 +135,7 @@ field("Outcome question","question","","E.g., Will benchmark X exceed Y on a spe
 field("Outcome / resolution deadline","targetDate","","The date by which YES/NO will be assessed.","date",true)+
 field("Your probability estimate (%)","probability","","Optional; a human hypothesis, NOT calibrated AI odds.","number",false,'min="0" max="100" step="1"')+
 field("Original source URL","sourceUrl","","Only http(s) links.","url")+
+select("Source classification (self-reported)","sourceType",[["unverified","Unverified"],["primary","Primary original record"],["secondary","Secondary reporting"],["commentary","Interpretation"]],"unverified")+
 field("Source checked on","sourceCheckedAt","","","date")+
 area("Objective resolution rule","resolutionRule","","What observable event counts as YES, and how is NO determined?")+
 area("Supporting evidence","evidence","","Dated source and key facts, not a fabricated citation.")+
@@ -131,7 +157,7 @@ select("Priority","priority",[["low","Low"],["medium","Medium"],["high","High"]]
 select("Status","status",[["planning","Planning"],["active","Active"],["paused","Paused"],["complete","Complete"]],a.status||"planning")+
 area("Next action","nextAction",a.nextAction||"","Describe an actionable checkpoint."),a.id));}
 function detail(kind,id){const a=work()[kind]?.find(x=>x.id===id);if(!a)return toast("Record not found",true);const rows=kind==="forecasts"?[
-["Question",a.question],["Forecast created",a.createdAt],["Target date",a.targetDate],["Original human estimate",a.probability==null?"NOT ENTERED":a.probability+"%"],["Original resolution rule",a.resolutionRule],["Supporting case",a.rationale],["Source evidence",a.evidence],["Disconfirming evidence",a.disconfirming],["Outcome",a.status==="resolved"?(a.outcome===1?"YES":"NO"):"UNRESOLVED"],["Resolution record",a.outcomeEvidence],["Resolution date",a.resolvedAt],["Brier score",a.status==="resolved"&&a.brier!=null?a.brier.toFixed(3):"Not scored"]]:
+["Question",a.question],["Forecast created",a.createdAt],["Target date",a.targetDate],["Original human estimate",a.probability==null?"NOT ENTERED":a.probability+"%"],["Original resolution rule",a.resolutionRule],["Supporting case",a.rationale],["Source evidence",a.evidence],["Source grade",evidenceGrade(a).label],["Record history",a.timeline?.map(x=>x.type+" @ "+x.at).join(" / ")||"Legacy record — no audit trail"],["Original integrity",forecastIntegrity(a).status],["Disconfirming evidence",a.disconfirming],["Outcome",a.status==="resolved"?(a.outcome===1?"YES":"NO"):"UNRESOLVED"],["Resolution record",a.outcomeEvidence],["Resolution date",a.resolvedAt],["Brier score",a.status==="resolved"&&a.brier!=null?a.brier.toFixed(3):"Not scored"]]:
 kind==="signals"?[["Signal",a.title],["Domain",a.domain],["Observed",a.observedAt],["Evidence",a.evidence],["Implication",a.implication],["Trigger",a.trigger]]:
 [["Title",a.title],["Thesis",a.thesis],["Countercase",a.countercase],["Options",a.options],["Next action",a.nextAction],["Review date",a.reviewDate]];
 modal("Intelligence dossier",a.demo?"Fictional example — not real intelligence":"Manual, browser-local research record",'<div class="badge-row">'+flag(a)+' '+(sourceLink(a))+'</div><div class="line"></div>'+rows.map(([k,v])=>'<div class="kv"><span>'+esc(k)+'</span><strong>'+esc(v==null?"Not recorded":String(v))+'</strong></div>').join("")+'<div class="form-foot">'+btn("Close","close-modal")+'</div>');}
@@ -145,9 +171,9 @@ function fget(fd,k){return text(fd.get(k)||"",2500);}
 function storeRecord(form){const fd=new FormData(form),kind=form.dataset.kind,arr=work()[kind];if(!arr)return toast("Invalid form",true);const old=arr.find(x=>x.id===form.dataset.editId);
 if(kind==="forecasts"&&old)return toast("Saved forecasts are immutable. Create a new version instead.",true);
 const a={...old,id:old?.id||uid(kind.slice(0,1)),demo:state.mode==="demo",createdAt:old?.createdAt||new Date().toISOString()};
-const fields={signals:["title","domain","level","observedAt","sourceUrl","evidence","implication","trigger"],forecasts:["question","targetDate","probability","sourceUrl","sourceCheckedAt","resolutionRule","evidence","rationale","disconfirming"],decisions:["title","reviewDate","status","thesis","countercase","options","nextAction"],projects:["title","focus","dueDate","priority","status","nextAction"]}[kind];
+const fields={signals:["title","domain","level","observedAt","sourceUrl","sourceType","evidence","implication","trigger"],forecasts:["question","targetDate","probability","sourceUrl","sourceType","sourceCheckedAt","resolutionRule","evidence","rationale","disconfirming"],decisions:["title","reviewDate","status","thesis","countercase","options","nextAction"],projects:["title","focus","dueDate","priority","status","nextAction"]}[kind];
 for(const f of fields)a[f]=fget(fd,f);
-if(kind==="forecasts"){a.probability=a.probability===""?null:Number(a.probability);const err=validateForecast(a);if(err)return toast(err,true);a.status="open";a.outcome=null;}
+if(kind==="forecasts"){a.probability=a.probability===""?null:Number(a.probability);const err=validateForecast(a);if(err)return toast(err,true);Object.assign(a,createForecastRecord(a));}
 if(kind==="signals"&&a.sourceUrl&&!safeUrl(a.sourceUrl))return toast("Only HTTP(S) source URLs are allowed",true);
 if(kind==="forecasts"&&a.sourceUrl&&!safeUrl(a.sourceUrl))return toast("Only HTTP(S) source URLs are allowed",true);
 if(["signals","decisions","projects"].includes(kind)&&!a.title)return toast("Title is required",true);
@@ -182,3 +208,4 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(modalRoot.innerH
 document.addEventListener("focusin",e=>{if(!modalRoot.innerHTML)return;const dialog=modalRoot.querySelector('[role="dialog"]');if(dialog&&!dialog.contains(e.target))dialog.querySelector(".close-btn")?.focus();});
 window.addEventListener("hashchange",render);
 render();
+loadPublicIntel();

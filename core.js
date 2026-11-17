@@ -18,7 +18,7 @@ export function safeUrl(x){try{const u=new URL(text(x));return ["http:","https:"
 export function uid(prefix){return prefix+"-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8);}
 export function isDate(x){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(x||"")))return false;const d=new Date(x+"T12:00:00Z");return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===x;}
 export function freshness(date,now=new Date()){if(!isDate(date))return "unknown";const days=Math.floor((now.getTime()-new Date(date+"T12:00:00Z").getTime())/86400000);return days>30?"stale":days>7?"aging":"recent";}
-export function sourceQuality(rec){return Boolean(rec&&!rec.demo&&safeUrl(rec.sourceUrl)&&isDate(rec.observedAt)&&text(rec.evidence).length>=20);}
+export function sourceQuality(rec){return Boolean(rec&&!rec.demo&&safeUrl(rec.sourceUrl)&&(isDate(rec.observedAt)||isDate(rec.sourceCheckedAt))&&text(rec.evidence).length>=20);}
 export function brier(prob,outcome){if(prob===""||prob===null||prob===undefined)return null;const p=Number(prob);if(!Number.isFinite(p)||p<0||p>100||![0,1].includes(outcome))return null;return Math.pow(p/100-outcome,2);}
 export const ORIGINAL_FIELDS=["question","targetDate","probability","resolutionRule","disconfirming","sourceUrl","sourceCheckedAt","evidence","rationale"];
 export function originalSnapshot(f){return Object.fromEntries(ORIGINAL_FIELDS.map(k=>[k,f[k]??null]));}
