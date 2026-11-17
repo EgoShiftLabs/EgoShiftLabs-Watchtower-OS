@@ -1,26 +1,26 @@
 {
   "schema": "watchtower-chief-brief-v1",
-  "generatedAt": "2026-11-17T17:36:17.216Z",
+  "generatedAt": "2026-11-17T23:30:23.583Z",
   "status": "public-only",
   "title": "CHIEF Public Intelligence Digest",
   "items": [
     {
       "id": "treasury-total-debt",
       "title": "U.S. total public debt outstanding",
-      "observationDate": "2026-11-13",
+      "observationDate": "2026-11-16",
       "sourceName": "U.S. Treasury FiscalData",
       "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
-      "finding": "40.6167 USD trillions; 0.0201% higher than the preceding published record",
+      "finding": "40.6624 USD trillions; 0.1126% higher than the preceding published record",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     },
     {
       "id": "treasury-held-public",
       "title": "U.S. federal debt held by the public",
-      "observationDate": "2026-11-13",
+      "observationDate": "2026-11-16",
       "sourceName": "U.S. Treasury FiscalData",
       "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
-      "finding": "32.8253 USD trillions; 0.0029% higher than the preceding published record",
+      "finding": "32.8529 USD trillions; 0.0840% higher than the preceding published record",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     },
@@ -30,7 +30,7 @@
       "observationDate": "2026-11-17",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "finding": "13 events",
+      "finding": "11 events",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     },
@@ -40,7 +40,7 @@
       "observationDate": "2026-11-17",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "finding": "6.6 magnitude",
+      "finding": "5.2 magnitude",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     }
@@ -49,9 +49,9 @@
     {
       "id": "treasury-total-debt",
       "historyCount": 140,
-      "observationDate": "2026-11-13",
-      "persistenceMae": 0.026537083846153456,
-      "rollingMae": 0.05635511769230769,
+      "observationDate": "2026-11-16",
+      "persistenceMae": 0.02681718615384576,
+      "rollingMae": 0.05683281384615384,
       "window": 7,
       "evaluationCount": 130,
       "unit": "USD trillions"
@@ -59,9 +59,9 @@
     {
       "id": "treasury-held-public",
       "historyCount": 140,
-      "observationDate": "2026-11-13",
-      "persistenceMae": 0.017250732307692255,
-      "rollingMae": 0.05224847538461555,
+      "observationDate": "2026-11-16",
+      "persistenceMae": 0.017449169230769165,
+      "rollingMae": 0.052720260000000116,
       "window": 7,
       "evaluationCount": 130,
       "unit": "USD trillions"
