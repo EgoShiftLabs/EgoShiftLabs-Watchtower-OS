@@ -117,3 +117,13 @@ Source code implements data processing and local reasoning; the system does NOT 
 - [ ] EIA_API_KEY configuration and original WTI data verification (owner action required).
 - [ ] More rigorous resolution adjudication, verified records at longer horizons, and human-vs-model comparisons on statistically defensible equivalent targets.
 - [ ] Physical iPhone and screen-reader accessibility review; public deployment remains a browser-local prototype.
+
+## V0.4.1 — Publish prospective, measurable source-based cohort
+- [x] Public Git-versioned track with original source, observation, timestamp, threshold, horizon and frozen mechanical YES/NO calls.
+- [x] Four first-week real Treasury questions (two related series × 7-day/14-day targets), with no invented outcomes or human probabilities.
+- [x] Scheduled update attempts to match the first eligible future official observation, preserve unresolved missing data and report accuracy only on resolved cohorts.
+- [x] Public counts and original-source links displayed in Forecast Lab; no private local data enters the public ledger.
+- [x] Deterministic tests for issue timing, duplicate suppression, later official outcome, missing outcomes, forged records, and source freshness.
+- [ ] Wait for actual eligible future Treasury observations before reporting ANY measured accuracy.
+- [ ] Evaluate model skill only with enough diverse, independent, source-backed resolved targets and a valid benchmark.
+- [ ] Improve Git history provenance via protected branches or independent signed timestamps if audit-grade records become necessary.

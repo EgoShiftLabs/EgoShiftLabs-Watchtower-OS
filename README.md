@@ -81,3 +81,11 @@ The current system is still a GitHub-hosted, publicly accessible prototype with 
 The Forecast Lab now supports [source-linked threshold forecasts](docs/THRESHOLD_FORECASTS.md) created from dated official time series, with locked original observations, a future threshold/date, a deterministic persistence YES/NO comparison, and user-confirmed first-eligible-observation outcome resolution. Human Brier score and deterministic persistence correctness are reported **separately**. CHIEF shows next-14-day forecast checkpoints, and decisions can optionally link to forecast IDs. Source observation dates and retrieval timestamps are displayed separately.
 
 The existing EIA WTI connection remains API-secret-gated; no WTI data or probabilistic predictions are claimed without a verified retrieval.
+
+## Live research cohort — public track record
+Watchtower now pre-registers a small, weekly batch of source-backed binary **mechanical baseline** forecasts through GitHub Actions, then checks later official observations against the original fixed rule. The outcomes, when observed, are written to a public versioned record and scored by simple YES/NO accuracy. **These are not personal forecasts and do not assert calibrated AI probabilities.**
+
+- [Public forecasting experiment methodology](docs/PUBLIC_FORECAST_TRACK.md)
+- [Original precommitted records](data/public-forecast-track.json)
+- [Public cohort results and pending count](data/public-forecast-summary.json)
+- The Forecast Lab displays this public track separately from local browser-only human predictions.

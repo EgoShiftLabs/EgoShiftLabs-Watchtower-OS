@@ -63,3 +63,6 @@ Resolved forecasts without a compatible original snapshot/history are excluded f
 For objective number-based outcomes, Watchtower can now bind the original human question to a particular public indicator, numeric threshold, date, dated source observation and original persistence comparison. The fixed settlement convention is the first observed source value ON OR AFTER the target date within seven calendar days. This is not a live statistical probability engine.
 
 The outcome is user-confirmed against the published source, and the human-estimated Brier score is distinct from the deterministic persistence YES/NO correctness. Missing data stays unresolved rather than silently scoring NO. See [THRESHOLD_FORECASTS.md](THRESHOLD_FORECASTS.md).
+
+## Prospective public research cohort
+The optional public experiment automatically issues a **small weekly set of deterministic binary baseline calls** tied to original Treasury observations and later public source resolutions. This experiment is not a personal forecast and does not generate subjective or calibrated event probabilities. It evaluates simple YES/NO hit rates only after an objective outcome, with unresolved sources retained. See [PUBLIC_FORECAST_TRACK.md](PUBLIC_FORECAST_TRACK.md).
