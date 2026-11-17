@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#09111d"><meta name="description" content="Watchtower OS: evidence-based strategic intelligence, scenario forecasting, and decisions.">
+<title>WATCHTOWER OS — Intelligence Command</title><link rel="icon" type="image/svg+xml" href="./assets/mark.svg"><link rel="stylesheet" href="./styles.css"></head>
+<body><div id="app" class="shell">
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="#command" aria-label="Watchtower OS command center"><img src="./assets/mark.svg" width="44" height="44" alt=""><span class="brand-words"><strong>WATCHTOWER</strong><small>OPERATING SYSTEM <span class="brand-version">/ 0.1</span></small></span></a>
+  <div class="sidebar-label">INTELLIGENCE WORKSPACE</div>
+  <nav id="sideNav" aria-label="Primary navigation">
+    <button type="button" data-nav="command" class="navbtn active"><span class="navico">◈</span> Command Center</button>
+    <button type="button" data-nav="watch" class="navbtn"><span class="navico">◎</span> Global Watch</button>
+    <button type="button" data-nav="forecast" class="navbtn"><span class="navico">⌁</span> Forecast Lab</button>
+    <button type="button" data-nav="decisions" class="navbtn"><span class="navico">◫</span> Decision Desk</button>
+    <button type="button" data-nav="projects" class="navbtn"><span class="navico">▤</span> Project Desk</button>
+    <button type="button" data-nav="agents" class="navbtn"><span class="navico">✧</span> Agent Room</button>
+    <button type="button" data-nav="settings" class="navbtn"><span class="navico">⚙</span> Settings & Data</button>
+  </nav>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-bottom"><div class="sidebar-digest"><span class="pulse"></span><div><strong>LOCAL RESEARCH MODE</strong><small>No real-time sources or autonomous agents connected</small></div></div><div class="sidebar-links"><a href="https://github.com/EgoShiftLabs/EgoShiftLabs-Watchtower-OS" target="_blank" rel="noopener noreferrer">GitHub repository ↗</a><a href="https://github.com/EgoShiftLabs/Watchtower-AI" target="_blank" rel="noopener noreferrer">Business Watchtower ↗</a></div><small class="legal">Public prototype · No private cloud vault<br>All seeded records are fictional.</small></div>
+</aside>
+<div class="main-area">
+<header class="topbar"><div class="top-left"><button id="mobileMenu" class="icon-btn mobile-menu" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><span class="breadcrumb">WATCHTOWER <span> / </span> <span id="crumb">COMMAND CENTER</span></span></div><div class="top-right"><span class="dot"></span><span class="status-text">SYSTEM ONLINE</span><span class="top-sep"></span><span id="topDate"></span><button class="workspace-toggle" id="modeToggle" type="button" title="Switch between fictional demo and your local workspace">DEMO SANDBOX ▾</button></div></header>
+<main id="content" class="content" tabindex="-1">
+ <section class="load-panel"><span class="tiny-eye">◉ SYSTEM INITIALIZATION</span><h1>Preparing your intelligence workspace.</h1><p>If this message remains, JavaScript modules may be blocked. Use a modern browser with scripts enabled or check the repository status.</p><a href="https://github.com/EgoShiftLabs/EgoShiftLabs-Watchtower-OS" class="primary-link">View repository ↗</a></section>
+</main>
+<footer class="footer"><span>WATCHTOWER OS <b>© 2026</b> • A RESEARCH & DECISION PRODUCT</span><span>Observe. Analyze. Forecast. Advise. Learn.</span></footer>
+</div></div>
+<div id="modalRoot"></div><div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script type="module" src="./app.js"></script></body></html>
