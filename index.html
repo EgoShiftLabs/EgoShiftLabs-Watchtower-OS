@@ -4,11 +4,15 @@
 <title>WATCHTOWER OS — Intelligence Command</title><link rel="icon" type="image/svg+xml" href="./assets/mark.svg"><link rel="stylesheet" href="./styles.css"></head>
 <body><div id="app" class="shell">
 <aside class="sidebar" id="sidebar">
-  <a class="brand" href="#command" aria-label="Watchtower OS command center"><img src="./assets/mark.svg" width="44" height="44" alt=""><span class="brand-words"><strong>WATCHTOWER</strong><small>OPERATING SYSTEM <span class="brand-version">/ 0.1</span></small></span></a>
+  <a class="brand" href="#command" aria-label="Watchtower OS command center"><img src="./assets/mark.svg" width="44" height="44" alt=""><span class="brand-words"><strong>WATCHTOWER</strong><small>OPERATING SYSTEM <span class="brand-version">/ 0.3</span></small></span></a>
   <div class="sidebar-label">INTELLIGENCE WORKSPACE</div>
   <nav id="sideNav" aria-label="Primary navigation">
     <button type="button" data-nav="command" class="navbtn active"><span class="navico">◈</span> Command Center</button>
     <button type="button" data-nav="watch" class="navbtn"><span class="navico">◎</span> Global Watch</button>
+    <button type="button" data-nav="brief" class="navbtn"><span class="navico">▣</span> CHIEF Brief</button>
+    <button type="button" data-nav="energy" class="navbtn"><span class="navico">◉</span> Energy Market Watch</button>
+    <button type="button" data-nav="patterns" class="navbtn"><span class="navico">⌁</span> Pattern Lab</button>
+    <button type="button" data-nav="causal" class="navbtn"><span class="navico">◇</span> Causal Map</button>
     <button type="button" data-nav="forecast" class="navbtn"><span class="navico">⌁</span> Forecast Lab</button>
     <button type="button" data-nav="decisions" class="navbtn"><span class="navico">◫</span> Decision Desk</button>
     <button type="button" data-nav="projects" class="navbtn"><span class="navico">▤</span> Project Desk</button>
@@ -16,7 +20,7 @@
     <button type="button" data-nav="settings" class="navbtn"><span class="navico">⚙</span> Settings & Data</button>
   </nav>
   <div class="sidebar-spacer"></div>
-  <div class="sidebar-bottom"><div class="sidebar-digest"><span class="pulse"></span><div><strong>LOCAL RESEARCH MODE</strong><small>No real-time sources or autonomous agents connected</small></div></div><div class="sidebar-links"><a href="https://github.com/EgoShiftLabs/EgoShiftLabs-Watchtower-OS" target="_blank" rel="noopener noreferrer">GitHub repository ↗</a><a href="https://github.com/EgoShiftLabs/Watchtower-AI" target="_blank" rel="noopener noreferrer">Business Watchtower ↗</a></div><small class="legal">Public prototype · No private cloud vault<br>All seeded records are fictional.</small></div>
+  <div class="sidebar-bottom"><div class="sidebar-digest"><span class="pulse"></span><div><strong>LOCAL RESEARCH MODE</strong><small>Official batch sources · no autonomous agents</small></div></div><div class="sidebar-links"><a href="https://github.com/EgoShiftLabs/EgoShiftLabs-Watchtower-OS" target="_blank" rel="noopener noreferrer">GitHub repository ↗</a><a href="https://github.com/EgoShiftLabs/Watchtower-AI" target="_blank" rel="noopener noreferrer">Business Watchtower ↗</a></div><small class="legal">Public prototype · No private cloud vault<br>All seeded records are fictional.</small></div>
 </aside>
 <div class="main-area">
 <header class="topbar"><div class="top-left"><button id="mobileMenu" class="icon-btn mobile-menu" type="button" aria-label="Open navigation" aria-expanded="false">☰</button><span class="breadcrumb">WATCHTOWER <span> / </span> <span id="crumb">COMMAND CENTER</span></span></div><div class="top-right"><span class="dot"></span><span class="status-text">SYSTEM ONLINE</span><span class="top-sep"></span><span id="topDate"></span><button class="workspace-toggle" id="modeToggle" type="button" title="Switch between fictional demo and your local workspace">DEMO SANDBOX ▾</button></div></header>

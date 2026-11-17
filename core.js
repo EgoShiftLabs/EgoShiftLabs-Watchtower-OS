@@ -1,4 +1,4 @@
-export const VERSION="0.1.0";
+export const VERSION="0.3.0";
 export const SCHEMA="watchtower-os-v1";
 export const DOMAINS=["Geopolitics","Economy","Energy","Technology","Financial markets","Supply chains","Public policy","Resilience","Other"];
 export const ROLES=[
@@ -11,7 +11,7 @@ export const ROLES=[
 {id:"concierge",name:"CONCIERGE",mission:"Supports personal operations",detail:"Organizes optional goals, schedules and preparedness without account integrations in this prototype."},
 {id:"archivist",name:"ARCHIVIST",mission:"Records outcomes and lessons",detail:"Keeps forecast resolutions, decision journals and evidence trails; never silently revises records."}
 ];
-export const MODULES=[["command","Command Center"],["watch","Global Watch"],["forecast","Forecast Lab"],["decisions","Decision Desk"],["projects","Project Desk"],["agents","Agent Room"],["settings","Settings"]];
+export const MODULES=[["command","Command Center"],["watch","Global Watch"],["brief","CHIEF Brief"],["energy","Energy Market Watch"],["patterns","Pattern Lab"],["causal","Causal Map"],["forecast","Forecast Lab"],["decisions","Decision Desk"],["projects","Project Desk"],["agents","Agent Room"],["settings","Settings"]];
 export function esc(x){return String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 export function text(x,max=2200){return String(x??"").trim().slice(0,max);}
 export function safeUrl(x){try{const u=new URL(text(x));return ["http:","https:"].includes(u.protocol)?u.href:"";}catch{return"";}}
@@ -71,7 +71,7 @@ export function resolveForecast(f,outcome,evidence,now=new Date()){
  return result;
 }
 export function scenarioWeighted(rows){if(!Array.isArray(rows)||!rows.length)return {error:"Enter scenarios."};let sum=0,weighted=0;for(const r of rows){const p=Number(r.weight),v=Number(r.impact);if(!Number.isFinite(p)||p<0||p>100||!Number.isFinite(v)||v<-100||v>100)return {error:"Weights must be 0–100, conditional impacts −100 to 100."};sum+=p;weighted+=p*v/100;}if(Math.abs(sum-100)>0.000001)return {error:"Scenario weights must total exactly 100%."};return {weighted,assumptionsOnly:true};}
-export function blankWorkspace(){return {schema:SCHEMA,mode:"demo",profile:{label:"Operator",risk:"Balanced",focus:"Global events, forecasting, decision quality",modules:MODULES.map(m=>m[0])},demo:{signals:[],forecasts:[],decisions:[],projects:[]},live:{signals:[],forecasts:[],decisions:[],projects:[]},createdAt:new Date().toISOString()};}
+export function blankWorkspace(){return {schema:SCHEMA,mode:"demo",profile:{label:"Operator",risk:"Balanced",focus:"Global events, forecasting, decision quality",modules:MODULES.map(m=>m[0])},demo:{signals:[],forecasts:[],decisions:[],projects:[],causal:[],localOil:null},live:{signals:[],forecasts:[],decisions:[],projects:[],causal:[],localOil:null},createdAt:new Date().toISOString()};}
 export function validWorkspace(x){
  if(!x||typeof x!=="object"||Array.isArray(x)||x.schema!==SCHEMA||!["demo","live"].includes(x.mode))return false;
  const allowed=["schema","mode","profile","demo","live","createdAt"];

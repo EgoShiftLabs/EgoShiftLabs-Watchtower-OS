@@ -1,15 +1,22 @@
 import {VERSION,SCHEMA,DOMAINS,ROLES,MODULES,esc,text,safeUrl,uid,isDate,freshness,sourceQuality,evidenceGrade,forecastIntegrity,createForecastRecord,brier,calibration,validateForecast,resolveForecast,scenarioWeighted,blankWorkspace,validWorkspace} from "./core.js";
 import {DEMO} from "./seed.js";
+import {safeSeries,csvPricePoints} from "./analytics.js";
+import {renderEnergy,renderPatterns,renderCausal,renderChief,chiefMarkdown} from "./intelligence-ui.js";
 
 const KEY="watchtower-os-public-v1";
 const root=document.getElementById("content"),modalRoot=document.getElementById("modalRoot");
 const sidebar=document.getElementById("sidebar"),navRoot=document.getElementById("sideNav");
 const today=()=>new Date().toISOString().slice(0,10);
 const copy=x=>JSON.parse(JSON.stringify(x));
-const initial=()=>{const x=blankWorkspace();x.demo=copy(DEMO);x.demo.scenario={};x.live.scenario={};return x;};
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(validWorkspace(s)){s.demo.scenario=s.demo.scenario||{};s.live.scenario=s.live.scenario||{};return s;}}catch(e){console.warn("Local storage is unavailable",e);}return initial();}
+const initial=()=>{const x=blankWorkspace();x.demo=copy(DEMO);x.demo.scenario={};x.demo.causal=[];x.demo.localOil=null;x.live.scenario={};x.live.causal=[];x.live.localOil=null;x.profile.featuresVersion=3;return x;};
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(validWorkspace(s)){for(const w of [s.demo,s.live]){w.scenario=w.scenario||{};w.causal=Array.isArray(w.causal)?w.causal:[];w.localOil=w.localOil||null;}
+ if(!s.profile.featuresVersion){for(const id of ["brief","energy","patterns","causal"])if(!s.profile.modules.includes(id))s.profile.modules.push(id);s.profile.featuresVersion=3;}
+ return s;}}catch(e){console.warn("Local storage is unavailable",e);}return initial();}
 let state=load(),previousFocus=null,filter="",rendering=false;
 let publicIntel={schema:"watchtower-public-intel-v1",status:"loading",retrievedAt:null,observations:[]};
+let publicHistory={schema:"watchtower-history-v1",status:"loading",retrievedAt:null,series:[],energy:{status:"needs_key"}};
+let chiefPublic={schema:"watchtower-chief-brief-v1",status:"loading",items:[],baselines:[],researchQuestions:[]};
+let selectedPatternId="";
 function work(){return state[state.mode];}
 function activeView(){const v=location.hash.slice(1);return MODULES.some(m=>m[0]===v)?v:"command";}
 function formatDate(s){if(!s)return "Unscheduled";if(!isDate(s))return "Unknown";return new Date(s+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"});}
@@ -31,14 +38,19 @@ function gradeTag(r){const g=evidenceGrade(r);return tag(g.label,g.tone)+(g.age&
 function sourceLink(r){return safeUrl(r.sourceUrl)?'<a class="text-link" href="'+esc(safeUrl(r.sourceUrl))+'" target="_blank" rel="noopener noreferrer">Original source ↗</a>':tag("NO SOURCE", "amber");}
 function riskTone(l){return l==="red"?"red":l==="orange"?"amber":l==="green"?"green":"blue";}
 function recordList(arr,renderer,nothing){return arr.length?'<div class="card-list">'+arr.map(renderer).join("")+'</div>':empty(nothing);}
-function modeNote(){return state.mode==="demo"?note('<b>SIMULATION MODE:</b> Every record and scenario in this view is fictional teaching material. No current signals, market data, or real predictions are implied.',"warning"):note('<b>PERSONAL / BROWSER-LOCAL:</b> You are entering manual research on this device. No API feeds, AI analysts or secure cloud storage are connected. Do not store confidential data.');}
+function modeNote(){return state.mode==="demo"?note('<b>SIMULATION MODE:</b> Manual demo records are fictional. Separately sourced official public indicators (where available) are REAL dated observations, not model-generated predictions.',"warning"):note('<b>PERSONAL / BROWSER-LOCAL:</b> You are entering manual research on this device. No API feeds, AI analysts or secure cloud storage are connected. Do not store confidential data.');}
 function setView(view){if(!MODULES.some(m=>m[0]===view))view="command";const enabled=state.profile.modules||[];if(!["command","settings"].includes(view)&&!enabled.includes(view))view="command";location.hash=view;render();sidebar.classList.remove("open");document.getElementById("mobileMenu").setAttribute("aria-expanded","false");window.scrollTo({top:0,behavior:"instant"});}
 function render(){if(rendering)return;rendering=true;try{const view=activeView(),enabled=state.profile.modules||[];if(!["command","settings"].includes(view)&&!enabled.includes(view)){location.hash="command";rendering=false;return render();}
 for(const n of navRoot.querySelectorAll("[data-nav]")){n.classList.toggle("active",n.dataset.nav===view);n.hidden=!["command","settings"].includes(n.dataset.nav)&&!enabled.includes(n.dataset.nav);}
 document.getElementById("crumb").textContent=(MODULES.find(x=>x[0]===view)||[])[1]?.toUpperCase()||"COMMAND CENTER";
 const modeButton=document.getElementById("modeToggle");modeButton.textContent=state.mode==="demo"?"DEMO SANDBOX ▾":"LOCAL WORKSPACE ▾";modeButton.classList.toggle("live",state.mode==="live");
 document.getElementById("topDate").textContent=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
-root.innerHTML=({command:renderCommand,watch:renderWatch,forecast:renderForecast,decisions:renderDecisions,projects:renderProjects,agents:renderAgents,settings:renderSettings}[view]||renderCommand)();
+root.innerHTML=({command:renderCommand,watch:renderWatch,
+ brief:()=>renderChief(chiefPublic,publicHistory,state.live,state.mode==="demo"),
+ energy:()=>renderEnergy(publicHistory,state.live.localOil),
+ patterns:()=>renderPatterns(publicHistory,selectedPatternId,state.live.localOil),
+ causal:()=>renderCausal(work().causal,publicIntel),
+ forecast:renderForecast,decisions:renderDecisions,projects:renderProjects,agents:renderAgents,settings:renderSettings}[view]||renderCommand)();
 }finally{rendering=false;}}
 
 function publicIntelPanel(){
@@ -52,6 +64,22 @@ function publicIntelPanel(){
  (observations.length?'<div class="card-list mt">'+observations.map(x=>'<div class="item"><div class="item-body"><div class="badge-row">'+tag("ORIGINAL PUBLIC SOURCE","green")+' '+tag("OBSERVATION "+freshness(x.observationDate).toUpperCase(),freshness(x.observationDate)==="stale"?"amber":"muted")+'</div><h3 class="mt">'+esc(x.label)+'</h3><p><strong>'+esc(x.value)+'</strong> '+esc(x.unit||"")+(typeof x.changePct==="number"?' · Change since previous published record: '+esc(x.changePct>0?"+":"")+esc(x.changePct.toFixed(3))+"%":"")+'</p><div class="item-meta">Observation date '+esc(x.observationDate)+' · '+esc(x.sourceName||"Original source")+' · <a class="text-link" rel="noopener noreferrer" target="_blank" href="'+esc(safeUrl(x.sourceUrl))+'">Source ↗</a></div></div></div>').join("")+'</div>':'<div class="empty mt">No public observations available. A permitted, verified data source is not connected yet.</div>')+
  '<p class="small mt"><a class="text-link" href="docs/PUBLIC_INTELLIGENCE.md" target="_blank" rel="noopener noreferrer">Read public-feed contract ↗</a></p></section>';
 }
+async function loadExtendedIntel(){
+ const read=async(path,schema)=>{
+  const response=await fetch("./data/"+path,{cache:"no-store"});if(!response.ok)throw Error("Missing "+path);
+  const o=await response.json();if(!o||o.schema!==schema)throw Error("Unexpected "+path+" schema");return o;
+ };
+ try{
+  const [h,b]=await Promise.all([
+   read("history.json","watchtower-history-v1"),
+   read("chief-public-brief.json","watchtower-chief-brief-v1")
+  ]);
+  if(!Array.isArray(h.series)||h.series.length>8||h.series.some(s=>!safeSeries(s)))throw Error("Invalid time-series history");
+  if(!Array.isArray(b.items)||b.items.length>30)throw Error("Invalid public brief");
+  publicHistory=h;chiefPublic=b;
+ }catch(e){console.warn("Historical data not ready:",e);publicHistory={status:"unavailable",series:[],energy:{status:"source_error",note:"No verified historical snapshot is currently available."}};chiefPublic={status:"unavailable",items:[],baselines:[],researchQuestions:[]};}
+ if(["brief","energy","patterns","causal","command"].includes(activeView()))render();
+}
 async function loadPublicIntel(){
  try{
   const response=await fetch("./data/public-intel.json",{cache:"no-store"});
@@ -60,7 +88,7 @@ async function loadPublicIntel(){
   if(d?.schema!=="watchtower-public-intel-v1"||!["unconfigured","active","stale"].includes(d.status)||!Array.isArray(d.observations))throw Error("Unexpected data feed schema");
   publicIntel={...d,observations:d.observations.filter(x=>x&&safeUrl(x.sourceUrl)&&isDate(x.observationDate)&&Number.isFinite(x.value)).slice(0,50)};
  }catch(e){publicIntel={status:"unavailable",observations:[],retrievedAt:null};}
- if(["watch","command"].includes(activeView()))render();
+ if(["watch","command","causal"].includes(activeView()))render();
 }
 function renderCommand(){const w=work(),real=state.mode==="live",open=w.forecasts.filter(x=>x.status!=="resolved"),cal=calibration(w.forecasts),signalCount=w.signals.length,reviewDue=w.decisions.filter(x=>x.status==="open"&&isDate(x.reviewDate)&&x.reviewDate<=today()).length;
 const latest=[...w.signals].sort((a,b)=>(b.observedAt||"").localeCompare(a.observedAt||"")).slice(0,3);
@@ -119,6 +147,15 @@ block("Enabled modules",'<p class="panel-sub">The core Command Center and Settin
 function modal(title,subtitle,content){previousFocus=document.activeElement;modalRoot.innerHTML='<div class="modal-backdrop" data-action="backdrop"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="modal-head"><div><h2 id="dialogTitle">'+esc(title)+'</h2><p>'+esc(subtitle)+'</p></div><button type="button" class="close-btn" data-action="close-modal" aria-label="Close">×</button></div>'+content+'</div></div>';document.body.style.overflow="hidden";modalRoot.querySelector(".close-btn")?.focus();}
 function closeModal(){modalRoot.innerHTML="";document.body.style.overflow="";previousFocus?.focus?.();}
 function formWrap(kind,body,id=""){return '<form id="recordForm" data-kind="'+esc(kind)+'" data-edit-id="'+esc(id)+'"><div class="form-grid">'+body+'</div><div class="form-foot">'+btn("Cancel","close-modal")+'<button class="btn btn-primary" type="submit">Save record</button></div></form>';}
+function editCausal(){
+ modal("Create causal research hypothesis","Manual, unverified causal reasoning; do not claim any relationship has been established.",formWrap("causal",
+ field("Possible cause","cause","","What event or condition might contribute?","text",true)+
+ field("Possible effect","effect","","What outcome could follow?","text",true)+
+ select("Domain","domain",DOMAINS.map(x=>[x,x]),"Energy")+
+ field("Original research source URL","sourceUrl","","Public research or primary record.","url")+
+ area("Proposed mechanism","mechanism","","Describe how, why and under which assumptions the relationship could occur.")+
+ area("Disconfirming observation","falsifier","","What would undermine this claim?")));
+}
 function editSignal(id){const a=work().signals.find(r=>r.id===id)||{};modal(a.id?"Review signal":"Add intelligence signal","Manually sourced observations only; never confuse this with a live alert.",formWrap("signals",
 field("Signal or event","title",a.title||"","State the exact observation.", "text",true)+
 select("Domain","domain",DOMAINS.map(x=>[x,x]),a.domain||"Geopolitics")+
@@ -171,11 +208,13 @@ function fget(fd,k){return text(fd.get(k)||"",2500);}
 function storeRecord(form){const fd=new FormData(form),kind=form.dataset.kind,arr=work()[kind];if(!arr)return toast("Invalid form",true);const old=arr.find(x=>x.id===form.dataset.editId);
 if(kind==="forecasts"&&old)return toast("Saved forecasts are immutable. Create a new version instead.",true);
 const a={...old,id:old?.id||uid(kind.slice(0,1)),demo:state.mode==="demo",createdAt:old?.createdAt||new Date().toISOString()};
-const fields={signals:["title","domain","level","observedAt","sourceUrl","sourceType","evidence","implication","trigger"],forecasts:["question","targetDate","probability","sourceUrl","sourceType","sourceCheckedAt","resolutionRule","evidence","rationale","disconfirming"],decisions:["title","reviewDate","status","thesis","countercase","options","nextAction"],projects:["title","focus","dueDate","priority","status","nextAction"]}[kind];
+const fields={signals:["title","domain","level","observedAt","sourceUrl","sourceType","evidence","implication","trigger"],forecasts:["question","targetDate","probability","sourceUrl","sourceType","sourceCheckedAt","resolutionRule","evidence","rationale","disconfirming"],decisions:["title","reviewDate","status","thesis","countercase","options","nextAction"],projects:["title","focus","dueDate","priority","status","nextAction"],causal:["cause","effect","domain","sourceUrl","mechanism","falsifier"]}[kind];
 for(const f of fields)a[f]=fget(fd,f);
 if(kind==="forecasts"){a.probability=a.probability===""?null:Number(a.probability);const err=validateForecast(a);if(err)return toast(err,true);Object.assign(a,createForecastRecord(a));}
 if(kind==="signals"&&a.sourceUrl&&!safeUrl(a.sourceUrl))return toast("Only HTTP(S) source URLs are allowed",true);
 if(kind==="forecasts"&&a.sourceUrl&&!safeUrl(a.sourceUrl))return toast("Only HTTP(S) source URLs are allowed",true);
+if(kind==="causal"&&(a.cause.length<5||a.effect.length<5||a.mechanism.length<20||a.falsifier.length<10))return toast("Causal hypotheses need named cause/effect, mechanism (20+ characters), and falsifier (10+).",true);
+if(kind==="causal"&&a.sourceUrl&&!safeUrl(a.sourceUrl))return toast("Evidence URLs must be HTTP(S)",true);
 if(["signals","decisions","projects"].includes(kind)&&!a.title)return toast("Title is required",true);
 if(kind==="signals"&&!isDate(a.observedAt))return toast("Enter a valid observation date",true);
 if(old)Object.assign(old,a);else arr.unshift(a);save();closeModal();render();toast(kind.slice(0,-1)+" saved in "+(state.mode==="demo"?"simulation":"local workspace"));}
@@ -191,18 +230,32 @@ case"add-signal":editSignal();break;case"view-signal":detail("signals",id);break
 case"add-forecast":editForecast();break;case"view-forecast":detail("forecasts",id);break;case"resolve-forecast":resolutionForm(id);break;
 case"add-decision":editDecision();break;case"view-decision":detail("decisions",id);break;
 case"add-project":editProject();break;case"edit-project":editProject(id);break;
+case"add-causal":editCausal();break;
+case"export-chief":download("watchtower-chief-brief-"+today()+".md",chiefMarkdown(chiefPublic,publicHistory,state.mode==="demo"?null:state.live),"text/markdown");toast("Combined public and local briefing saved on your device.");break;
 case"go-watch":setView("watch");break;case"go-forecast":setView("forecast");break;
 case"agent-doc":window.open("./docs/AGENTS.md","_blank","noopener,noreferrer");break;
 case"close-modal":closeModal();break;case"backdrop":closeModal();break;
 case"export":download("watchtower-os-backup-"+today()+".json",JSON.stringify(state,null,2));toast("Browser data export downloaded. Store privately.");break;
 case"import":document.getElementById("importFile")?.click();break;
-case"reset-demo":if(confirm("Restore fictional example records?")){state.demo=copy(DEMO);state.demo.scenario={};save();render();toast("Demo restored.");}break;
-case"clear-live":if(confirm("Permanently delete all LOCAL workspace entries from this browser? Export a backup first.")){state.live={signals:[],forecasts:[],decisions:[],projects:[],scenario:{}};save();render();toast("Local research deleted from this browser.");}break;
+case"reset-demo":if(confirm("Restore fictional example records?")){state.demo=copy(DEMO);state.demo.scenario={};state.demo.causal=[];state.demo.localOil=null;save();render();toast("Demo restored.");}break;
+case"clear-live":if(confirm("Permanently delete all LOCAL workspace entries from this browser? Export a backup first.")){state.live={signals:[],forecasts:[],decisions:[],projects:[],scenario:{},causal:[],localOil:null};save();render();toast("Local research deleted from this browser.");}break;
 }}
 document.addEventListener("click",e=>{const n=e.target.closest("[data-nav]");if(n){setView(n.dataset.nav);return;}const a=e.target.closest("[data-action]");if(a){e.preventDefault();if(a.dataset.action==="backdrop"&&e.target!==a)return;handleAction(a);}});
 modalRoot.addEventListener("submit",e=>{e.preventDefault();if(e.target.id==="recordForm")storeRecord(e.target);if(e.target.id==="resolutionForm")saveResolution(e.target);});
 root.addEventListener("submit",e=>{e.preventDefault();const f=e.target;if(f.id==="scenarioForm")saveScenario(f);if(f.id==="profileForm"){const fd=new FormData(f);state.profile.label=text(fd.get("label"),80)||"Operator";state.profile.risk=text(fd.get("risk"),30);state.profile.focus=text(fd.get("focus"),500);save();render();toast("Local preferences updated.");}if(f.id==="moduleForm"){const fd=new FormData(f);state.profile.modules=["command","settings",...MODULES.filter(x=>!["command","settings"].includes(x[0])&&fd.get(x[0])==="on").map(x=>x[0])];save();render();toast("Navigation preferences saved.");}});
-root.addEventListener("change",e=>{if(e.target.id==="importFile"){importFile(e.target.files?.[0]);e.target.value="";}});
+root.addEventListener("change",async e=>{
+ if(e.target.id==="importFile"){importFile(e.target.files?.[0]);e.target.value="";}
+ if(e.target.id==="patternSeries"){selectedPatternId=e.target.value;render();}
+ if(e.target.id==="oilCsv"){
+  const file=e.target.files?.[0];if(!file)return;
+  if(file.size>500000){toast("Oil-price CSV must be smaller than 500 KB.",true);return;}
+  try{
+   const points=csvPricePoints(await file.text());
+   state.live.localOil={points,importedAt:new Date().toISOString()};
+   state.mode="live";save();render();toast("Local oil-price CSV loaded. Values are user-supplied and unverified.");
+  }catch(err){toast(err.message,true);}
+ }
+});
 document.getElementById("modeToggle").addEventListener("click",()=>{state.mode=state.mode==="demo"?"live":"demo";save();render();toast(state.mode==="demo"?"Simulation workspace activated":"Local manual research activated — data never leaves this browser.");});
 document.getElementById("mobileMenu").addEventListener("click",()=>{const open=sidebar.classList.toggle("open");document.getElementById("mobileMenu").setAttribute("aria-expanded",String(open));});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(modalRoot.innerHTML)closeModal();else sidebar.classList.remove("open");}});
@@ -210,3 +263,4 @@ document.addEventListener("focusin",e=>{if(!modalRoot.innerHTML)return;const dia
 window.addEventListener("hashchange",render);
 render();
 loadPublicIntel();
+loadExtendedIntel();
