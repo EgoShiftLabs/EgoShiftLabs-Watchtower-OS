@@ -1,0 +1,7 @@
+{
+  "schema": "watchtower-public-track-v1",
+  "policy": "weekly-two-horizons-v1",
+  "records": [],
+  "updatedAt": null,
+  "notice": "Public research baseline predictions only. No human probabilities or personalized records. Future outcomes remain unknown until a qualifying original observation is published."
+}

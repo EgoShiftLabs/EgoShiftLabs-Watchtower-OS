@@ -1,0 +1,13 @@
+{
+  "schema": "watchtower-public-track-summary-v1",
+  "policy": "weekly-two-horizons-v1",
+  "generatedAt": null,
+  "created": 0,
+  "open": 0,
+  "resolved": 0,
+  "unresolvedMissingData": 0,
+  "evaluated": 0,
+  "accuracy": null,
+  "recentRecords": [],
+  "notice": "No registered baseline forecasts yet. These are deterministic research questions, not human or model-calibrated probabilities."
+}
