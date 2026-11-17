@@ -40,7 +40,7 @@ export function renderPatterns(history,selectedId,localOil){
 export function renderEnergy(history,localOil){
  const e=history?.energy||{status:"needs_key"};
  const energySource=history?.series?.find(x=>x.id==="eia-wti-spot");
- const pub=e.status==="active"&&energySource&&safeSeries(energySource);
+ const pub=["active","stale"].includes(e.status)&&energySource&&safeSeries(energySource);
  const manual=localOil?.points?.length>=3?{id:"local-oil-csv",label:"WTI or oil prices: manually imported CSV",unit:"USD/barrel",sourceName:"Unverified user-supplied CSV",sourceUrl:"https://www.eia.gov/opendata/",points:localOil.points,frequency:"local dated observations",method:"User-provided prices not independently verified"}:null;
  const active=pub?energySource:manual;
  const config=e.status==="active"?"LIVE EIA SERIES":e.status==="stale"?"LAST KNOWN EIA HISTORY · STALE":e.status==="source_error"?"EIA FETCH FAILED": "EIA KEY NOT CONFIGURED";

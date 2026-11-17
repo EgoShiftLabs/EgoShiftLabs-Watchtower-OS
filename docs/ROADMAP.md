@@ -90,3 +90,17 @@ Not the number of dashboard cards. Demonstrate objectively improved user decisio
 - [ ] Implement simple persistence and moving-average baseline with rolling-window out-of-sample error measurements.
 - [ ] Verify legally accessible EIA oil data and correct licensing/attribution before adding a source-specific energy adapter.
 - [ ] Add a concise weekly public-data digest with explicit source freshness, no probabilistic forecasts until backtested.
+
+## V0.3 — GitHub-only four-part integration
+
+- [x] CHIEF public briefing generator, source-backed numerical observations, generated timestamp, research prompts, private browser-only Markdown export.
+- [x] Historical Pattern Lab with real Treasury daily/business-day series, descriptive volatility, trailing mean, simple one-step walk-forward persistence and moving-average error.
+- [x] Optional EIA API v2 WTI spot-price connector (tested normalizer + encrypted Actions key mechanism; ACTIVATION PENDING key and live verification), plus locally imported CSV alternative.
+- [x] Causal Map with documented research mechanisms, original-source links and manually entered falsifying conditions. No automatic causal inference.
+- [x] Shared GitHub Pages dashboard navigation for four modules, each independently labeled.
+- [ ] Configure `EIA_API_KEY` privately and independently verify API response, source units, observation lag and output.
+- [ ] Test Android/iPhone mobile, keyboard, browser storage/import-export and real source outage states on actual hardware.
+- [ ] Expand energy coverage to petroleum inventories, supply, demand and historical cross-validation after the first EIA price connector is proven.
+- [ ] Upgrade from 1-step history-only baseline MAE to out-of-sample evaluated 30/90-day horizons with uncertainty, if decision value justifies it.
+
+Source code implements data processing and local reasoning; the system does NOT have generalized forecast skill or personalized investment/trading recommendations.

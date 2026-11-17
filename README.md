@@ -63,3 +63,16 @@ The repository now includes **a keyless GitHub Actions collector** for two real 
 **Check the dashboard or raw `data/public-intel.json` for the last real retrieval timestamp and source status**. The existence of a workflow does not prove that a particular scheduled run has succeeded. If it fails, the previous data remains and eventually appears stale. No market prediction or real AI inference is performed by these feeds.
 
 Oil-price / EIA series, current investment recommendations, user-specific financial advice, private data storage, autonomous geopolitical analysis and calibrated forecasts **remain future work**.
+
+## V0.3 — Four intelligence integrations (November 17, 2026)
+
+The existing repo now includes four integrated dashboard modules; each has an honest operating boundary:
+
+1. **CHIEF Brief** — a rule-generated public evidence briefing from official indicators, plus an optional combined Markdown export with local decision reminders. Private user notes are assembled **only in the browser** and never pushed to GitHub Actions.
+2. **Pattern Lab** — 140 official Treasury history observations per series (2 series) and one-step persistence/rolling-mean baseline MAE, return volatility and plotted trends. These are DESCRIPTIVE historical errors, not probabilities or investment advice.
+3. **Energy Market Watch** — a tested **optional** EIA API v2 WTI spot-price adapter (server-side `EIA_API_KEY` in GitHub Actions secrets); status remains NEEDS_KEY until the secret is supplied and a live collection succeeds. A CSV import can be analyzed locally without a key (assumes date,value with positive USD/barrel values).
+4. **Causal Map** — linked source-backed research templates plus user-created hypotheses with mechanisms and falsifiers. It does NOT infer causal relationships, generate AI conclusions or backfill facts.
+
+**To activate EIA WTI:** register at https://www.eia.gov/opendata/register.php and set the secret named `EIA_API_KEY` at https://github.com/EgoShiftLabs/EgoShiftLabs-Watchtower-OS/settings/secrets/actions . The existing scheduled workflow attempts the oil-price adapter only when the secret exists; it never commits the secret. After a completed workflow, confirm `data/history.json` displays `energy.status = active` and a documented original observation date.
+
+The current system is still a GitHub-hosted, publicly accessible prototype with browser-local, unencrypted user records. There is no secure login, real AI agent or validated predictive model. The static public CHIEF report is not a personalized AI recommendation.

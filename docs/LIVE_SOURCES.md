@@ -39,3 +39,13 @@ The collector uses no secrets, but any future EIA or FRED integration must follo
 - Time-series history for trend lines, descriptive change statistics and baseline forecasts.
 - EIA oil indicators after access and terms are verified.
 - Model selection, historical backtests and calibration only after reliable historical data exists.
+
+## V0.3 — Historical baseline and energy extensions
+
+The same GitHub Actions collector now obtains **up to 140 official Treasury debt observations** as a public dated history, published at `data/history.json`. The public CHIEF brief at `data/chief-public-brief.json` is generated deterministically from original observations with attribution. It intentionally never contains local decisions or user preferences.
+
+The optional EIA WTI endpoint uses **API v2**: `https://api.eia.gov/v2/petroleum/pri/spt/data/`, `frequency=daily`, `data[0]=value`, `facets[series][]=RWTC`, newest 140 rows. This is only called if the encrypted `EIA_API_KEY` GitHub Actions secret is configured. See https://www.eia.gov/opendata/documentation.php and EIA's public reuse policy https://www.eia.gov/about/copyrights_reuse.php. Data receives source attribution; it cannot be modified and still called official EIA data.
+
+New historical calculations in the browser include previous-observation change, 7-observation arithmetic mean, recent percentage-change volatility, and one-step walk-forward MAE for persistence and rolling means. These evaluate **past observations**, not forecast probabilities. Treasury public debt is a debt stock and not an interest-rate yield. The historical assessment is specific to the source's frequency and does not establish a causal relationship to markets.
+
+The integrated **Causal Map** uses curated original EIA background references and optional user-entered, falsifiable links. The graph illustrates hypotheses, not software-verified event causation.

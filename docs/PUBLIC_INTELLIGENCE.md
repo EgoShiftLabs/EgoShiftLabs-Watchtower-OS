@@ -39,3 +39,11 @@ The [official-source collector](../scripts/collect-official.mjs) fetches two key
 Detailed sources and semantics: [LIVE_SOURCES.md](LIVE_SOURCES.md).
 
 **Live means a recent documented retrieval**, not continuous monitoring. Treasury debt stocks are not Treasury yield quotations, and USGS quake counts are not generalized geopolitical predictors. The static dashboard displays source observation age independently from last retrieval age. 
+
+## GitHub-only intelligence bundle (v0.3)
+
+Historical source snapshots are published at `data/history.json`; a dated, PUBLIC-only executive brief is generated at `data/chief-public-brief.json`. Both are built from the same validated official-source collector and committed with the source snapshot. The combined briefing adds local-only decision reminders in the user's browser when they export Markdown.
+
+The first real historical series are Treasury debt stocks. An optional EIA WTI crude-price source is coded but does NOT retrieve oil data until the user configures `EIA_API_KEY` as a GitHub Actions repository secret and a run succeeds. No secret is included in any public JSON or frontend code.
+
+CHIEF's automatic summary is a fixed rule-based data digest, not LLM inference or a calibrated predictor. The Pattern Lab's rolling one-step historical MAE does not establish 90-day forecasting power.

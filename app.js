@@ -96,6 +96,13 @@ const top=[...w.forecasts].filter(x=>x.status!=="resolved").slice(0,2);
 return header("PERSONAL INTELLIGENCE / SYSTEM OVERVIEW","Your intelligence command.","A structured view of changing conditions, forecasts, competing hypotheses and decisions worth your attention.",btn("＋ Log a signal","add-signal","","btn-primary")+btn("＋ New forecast","add-forecast"))+modeNote()+
 '<section class="hero mt"><div><div class="kicker">◉ CHIEF / OPERATING DIRECTIVE</div><h2>Observe the world.<br>Challenge the assumptions.<br>Own the decision.</h2><p>Global evidence, structured forecasts, responsible scenario analysis and accountable decisions—without pretending that uncertain events are known in advance.</p></div><div class="hero-orb"><img src="./assets/mark.svg" alt=""></div></section>'+
 '<div class="grid metrics">'+stat("TRACKED SIGNALS",String(signalCount),real?"Manually entered observations":"Synthetic learning examples","◎")+stat("OPEN FORECASTS",String(open.length),"Outcome still pending / not settled","⌁")+stat("RESOLVED FORECASTS",String(cal.count),"Only genuine non-demo outcomes count","◈")+stat("DECISIONS TO REVIEW",String(reviewDue),"Entries due on or before today","▤")+'</div>'+
+'<div class="section-line"><h2>Intelligence workspaces</h2><span>AVAILABLE NOW · DIFFERENT MISSIONS</span></div>'+
+'<div class="grid two">'+
+'<section class="panel"><div class="kicker">CHIEF / EVIDENCE BRIEF</div><h3 class="mt">Executive decision intelligence</h3><p class="panel-sub">Official observation summaries, review checkpoints and local-only notes.</p>'+btn("Open CHIEF Brief","go-brief","","btn-sm btn-primary")+'</section>'+
+'<section class="panel"><div class="kicker">ENERGY / OIL RESEARCH</div><h3 class="mt">Petroleum Market Watch</h3><p class="panel-sub">Optional EIA WTI series and local historical price comparisons.</p>'+btn("Open Energy Watch","go-energy","","btn-sm btn-primary")+'</section>'+
+'<section class="panel"><div class="kicker">PATTERN / MEASUREMENT</div><h3 class="mt">Historical Baseline Lab</h3><p class="panel-sub">Real public series, moving means, historical walk-forward errors and source dates.</p>'+btn("Open Pattern Lab","go-patterns","","btn-sm btn-primary")+'</section>'+
+'<section class="panel"><div class="kicker">CAUSAL / RED TEAM</div><h3 class="mt">Research causal relationships</h3><p class="panel-sub">Source-linked mechanisms and testable counterhypotheses, not automated proof.</p>'+btn("Open Causal Map","go-causal","","btn-sm btn-primary")+'</section></div>'+
+'<div class="section-line"><h2>Global research activity</h2><span>MANUAL WORKSPACE</span></div>'+
 '<div class="grid wide-split">'+block("Global signal watch",recordList(latest,r=>'<article class="item"><div class="item-body">'+flag(r)+' '+tag((r.level||"yellow").toUpperCase(),riskTone(r.level))+'<h3 class="mt">'+esc(r.title)+'</h3><p>'+esc(r.implication||"No implication recorded.")+'</p><div class="item-meta">'+esc(r.domain||"Other")+' / '+esc(formatDate(r.observedAt))+'</div></div></article>',"No signals yet. Start with an original, timestamped source."),btn("Open Global Watch","go-watch","","btn-sm btn-ghost"))+
 block("CHIEF / decision priorities",'<p class="panel-sub">The system is not currently making AI recommendations. These are your outstanding checkpoints and pending forecast questions.</p>'+
 recordList(top,r=>'<div class="item"><div class="item-body"><h3>'+esc(r.question)+'</h3><p>Target: '+esc(formatDate(r.targetDate))+' · '+(r.probability==null?"No probability entered":"User estimate "+esc(r.probability)+"%")+'</p></div></div>',"No unresolved forecasts.")+
@@ -233,6 +240,8 @@ case"add-project":editProject();break;case"edit-project":editProject(id);break;
 case"add-causal":editCausal();break;
 case"export-chief":download("watchtower-chief-brief-"+today()+".md",chiefMarkdown(chiefPublic,publicHistory,state.mode==="demo"?null:state.live),"text/markdown");toast("Combined public and local briefing saved on your device.");break;
 case"go-watch":setView("watch");break;case"go-forecast":setView("forecast");break;
+case"go-brief":setView("brief");break;case"go-energy":setView("energy");break;
+case"go-patterns":setView("patterns");break;case"go-causal":setView("causal");break;
 case"agent-doc":window.open("./docs/AGENTS.md","_blank","noopener,noreferrer");break;
 case"close-modal":closeModal();break;case"backdrop":closeModal();break;
 case"export":download("watchtower-os-backup-"+today()+".json",JSON.stringify(state,null,2));toast("Browser data export downloaded. Store privately.");break;
