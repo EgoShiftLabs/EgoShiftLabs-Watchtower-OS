@@ -1,0 +1,54 @@
+name: Refresh official public intelligence
+on:
+  schedule:
+    - cron: '17 4,16 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/official-normalizers.mjs'
+      - 'scripts/collect-official.mjs'
+      - '.github/workflows/live-intel.yml'
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  collect-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Get official observations (fail closed on source errors)
+        run: |
+          node scripts/collect-official.mjs
+          npm run check:intel
+          npm test
+      - name: Commit validated public-only snapshot
+        run: |
+          git config user.name 'watchtower-data-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/public-intel.json
+          if git diff --staged --quiet; then
+            echo "No updated public observations."
+          else
+            git commit -m "data: update Treasury and USGS public observations"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - name: Deploy updated data to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
