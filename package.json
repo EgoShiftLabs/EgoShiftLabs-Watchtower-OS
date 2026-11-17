@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "check": "node --check core.js && node --check seed.js && node --check app.js && npm run check:intel && npm run check:history",
+    "check": "node --check core.js && node --check seed.js && node --check app.js && node --check intelligence-ui.js && node --check analytics.js && node --check scripts/official-normalizers.mjs && node --check scripts/historical-build.mjs && node --check scripts/collect-official.mjs && npm run check:intel && npm run check:history",
     "test": "node --test tests/*.test.js",
     "check:intel": "node scripts/check-public-intel.mjs",
     "check:history": "node scripts/check-history.mjs"
