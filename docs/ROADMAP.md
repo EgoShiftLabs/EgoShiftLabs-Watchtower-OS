@@ -78,3 +78,15 @@ Not the number of dashboard cards. Demonstrate objectively improved user decisio
 - [ ] Keep Watchtower Business and future Crypto Watchtower independent; suite integrations require explicit permission.
 
 **Known limitation:** Local browser logs cannot be made truly append-only for a user who edits localStorage or exported JSON. This release prevents ordinary UI rewriting and highlights inconsistent original snapshots; it is not a cryptographic audit system.
+
+## Immediate next milestone — official-source pipeline and defensible analytics
+
+- [x] Add two keyless, original, officially published sources (Treasury public debt outstanding and USGS recent earthquakes).
+- [x] Implement source-specific normalizers, date sanity checks, strict public JSON schema, and failure-safe collection.
+- [x] Add twice-daily scheduled GitHub Actions job and on-demand run; generated public files are deployed to Pages when the collector succeeds.
+- [x] Display official observation date, retrieval age, descriptive period change and source attribution.
+- [ ] Confirm successful publishing and live dashboard values against sources after initial Actions run.
+- [ ] Add 20–60 observations of *one comparable time series*, rather than joining unrelated latest observations into a fabricated forecast.
+- [ ] Implement simple persistence and moving-average baseline with rolling-window out-of-sample error measurements.
+- [ ] Verify legally accessible EIA oil data and correct licensing/attribution before adding a source-specific energy adapter.
+- [ ] Add a concise weekly public-data digest with explicit source freshness, no probabilistic forecasts until backtested.

@@ -55,3 +55,11 @@ This personal intelligence operating system is separate from [Watchtower AI / bu
 - Signals and forecasts display self-reported source classification and freshness. This is not independent source verification.
 - The [public intelligence feed](docs/PUBLIC_INTELLIGENCE.md) ships as an intentionally EMPTY, **unconfigured** JSON contract. A manual validation workflow exists; no EIA/FRED/news data is collected or modeled yet.
 - Static HTML remains useful when scripts fail, and CI validates source syntax, rules and the data contract.
+
+## Official public data pipeline (GitHub-only)
+
+The repository now includes **a keyless GitHub Actions collector** for two real official sources: [U.S. Treasury FiscalData](https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny) and the [USGS M4.5+ past-day GeoJSON feed](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson). The workflow is configured to run twice daily (subject to GitHub Actions scheduling delays) and publish its validated, PUBLIC-only JSON snapshot. [Collector and verification details](docs/LIVE_SOURCES.md).
+
+**Check the dashboard or raw `data/public-intel.json` for the last real retrieval timestamp and source status**. The existence of a workflow does not prove that a particular scheduled run has succeeded. If it fails, the previous data remains and eventually appears stale. No market prediction or real AI inference is performed by these feeds.
+
+Oil-price / EIA series, current investment recommendations, user-specific financial advice, private data storage, autonomous geopolitical analysis and calibrated forecasts **remain future work**.

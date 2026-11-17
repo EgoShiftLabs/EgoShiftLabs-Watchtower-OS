@@ -31,3 +31,9 @@ The GitHub repository and Pages code are PUBLIC. Browser localStorage is neither
 
 ## Quality assurance
 The current CI verifies syntax and pure forecasting/scenario rules. Browser-level tests on mobile hardware and screen-reader audits remain outstanding. Passing CI is NOT evidence of production cybersecurity, predictive accuracy or live connectivity.
+
+## V0.2 public data architecture addendum
+
+A GitHub Actions scheduled job fetches official US Treasury FiscalData and USGS recent quake GeoJSON, validates their source-specific structures and dates, and emits a strictly limited public-only JSON file. It commits a snapshot and independently deploys the updated Pages site. This is a backend-less **batch collection** architecture, not realtime server inference. User-entered data is never read by the collector.
+
+There is no EIA/FRED market data integration, historical predictive model, user database, authenticated source data API, private store or independent research agent. See [LIVE_SOURCES.md](LIVE_SOURCES.md).

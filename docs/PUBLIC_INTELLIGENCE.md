@@ -1,6 +1,6 @@
 # Watchtower OS — Public intelligence feed contract
 
-**CURRENT STATUS: UNCONFIGURED.** An empty JSON feed and a manual validation workflow exist. No external news, EIA, FRED, or market API is presently connected.
+**Pipeline update:** A verified-schema collector and scheduled GitHub Actions workflow for official Treasury debt and USGS earthquake data have now been committed. The feed's **actual** status and timestamp in `data/public-intel.json` indicate whether collection and publication succeeded; do not infer live data merely from code presence. EIA, FRED, news feeds and market API connections remain unconfigured.
 
 ## Intended architecture
 
@@ -31,3 +31,11 @@ The manual GitHub workflow only checks that this schema is valid. A scheduled co
 ## Data interpretation
 
 A fresh download of an older observation is not a fresh reading. A significant change is not automatically a reliable forecast. A commodity benchmark is not an equity price forecast. Any probabilistic claims need a named, tested model, known horizon, appropriate baseline and error measurement.
+
+## Current live-source adapter and status verification
+
+The [official-source collector](../scripts/collect-official.mjs) fetches two keyless official US data sources, parses them with source-specific validation, and emits only public numeric observations. The [scheduled workflow](../.github/workflows/live-intel.yml) runs at 04:17 and 16:17 UTC plus manual dispatch, can be delayed by GitHub, and aborts on invalid/failed source responses. It retries concurrent branch updates before publishing. The validator rejects unknown fields to minimize accidentally publishing user records.
+
+Detailed sources and semantics: [LIVE_SOURCES.md](LIVE_SOURCES.md).
+
+**Live means a recent documented retrieval**, not continuous monitoring. Treasury debt stocks are not Treasury yield quotations, and USGS quake counts are not generalized geopolitical predictors. The static dashboard displays source observation age independently from last retrieval age. 
