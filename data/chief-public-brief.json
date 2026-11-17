@@ -1,12 +1,82 @@
 {
   "schema": "watchtower-chief-brief-v1",
-  "status": "unconfigured",
-  "generatedAt": null,
+  "generatedAt": "2026-11-17T16:18:30.645Z",
+  "status": "public-only",
   "title": "CHIEF Public Intelligence Digest",
-  "items": [],
-  "baselines": [],
-  "researchQuestions": [],
+  "items": [
+    {
+      "id": "treasury-total-debt",
+      "title": "U.S. total public debt outstanding",
+      "observationDate": "2026-11-13",
+      "sourceName": "U.S. Treasury FiscalData",
+      "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+      "finding": "40.6167 USD trillions; 0.0201% higher than the preceding published record",
+      "type": "observed",
+      "confidence": "Official source; observation does not imply a causal mechanism."
+    },
+    {
+      "id": "treasury-held-public",
+      "title": "U.S. federal debt held by the public",
+      "observationDate": "2026-11-13",
+      "sourceName": "U.S. Treasury FiscalData",
+      "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+      "finding": "32.8253 USD trillions; 0.0029% higher than the preceding published record",
+      "type": "observed",
+      "confidence": "Official source; observation does not imply a causal mechanism."
+    },
+    {
+      "id": "usgs-quake-count",
+      "title": "M4.5+ earthquakes in rolling 24 hours",
+      "observationDate": "2026-11-17",
+      "sourceName": "U.S. Geological Survey",
+      "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
+      "finding": "12 events",
+      "type": "observed",
+      "confidence": "Official source; observation does not imply a causal mechanism."
+    },
+    {
+      "id": "usgs-largest-quake",
+      "title": "Largest M4.5+ event in rolling 24 hours",
+      "observationDate": "2026-11-17",
+      "sourceName": "U.S. Geological Survey",
+      "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
+      "finding": "6.6 magnitude",
+      "type": "observed",
+      "confidence": "Official source; observation does not imply a causal mechanism."
+    }
+  ],
+  "baselines": [
+    {
+      "id": "treasury-total-debt",
+      "historyCount": 140,
+      "observationDate": "2026-11-13",
+      "persistenceMae": 0.026537083846153456,
+      "rollingMae": 0.05635511769230769,
+      "window": 7,
+      "evaluationCount": 130,
+      "unit": "USD trillions"
+    },
+    {
+      "id": "treasury-held-public",
+      "historyCount": 140,
+      "observationDate": "2026-11-13",
+      "persistenceMae": 0.017250732307692255,
+      "rollingMae": 0.05224847538461555,
+      "window": 7,
+      "evaluationCount": 130,
+      "unit": "USD trillions"
+    }
+  ],
+  "researchQuestions": [
+    "What changed in each ORIGINAL source since the preceding dated observation?",
+    "Do comparable historical observations support a reliable baseline, or is more data required?",
+    "Which causal link is only a hypothesis, and what observation would disconfirm it?",
+    "What decisions or forecasts are due in the LOCAL workspace? (Not available to GitHub Actions.)"
+  ],
   "limitations": [
-    "No public brief has been generated yet."
+    "This digest is rule-generated from public time series, not an AI interpretation.",
+    "No private decisions or user forecasts were read or published.",
+    "Historical baseline MAE is not a probability of a market move.",
+    "Two separate official indicators are not evidence that they influence each other."
   ]
 }
