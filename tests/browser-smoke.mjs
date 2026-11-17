@@ -21,20 +21,25 @@ try{
  await page.locator('[data-nav="brief"]').click();
  const btn=page.locator('[data-action="export-chief"]');
  assert.ok(await btn.count(),"Local CHIEF Markdown export must be present");
+ await page.locator('[data-nav="energy"]').click();
+ await page.locator('#oilCsv').setInputFiles({name:"wti-research.csv",mimeType:"text/csv",buffer:Buffer.from("date,value\n2026-10-01,72\n2026-10-02,73\n2026-10-03,71\n2026-10-04,74")});
+ await page.locator("h2").filter({hasText:"WTI or oil prices: manually imported CSV"}).waitFor({timeout:7000});
+ await page.locator('[data-nav="forecast"]').click();
+ await page.locator('[data-action="add-forecast"]').click();
+ await page.locator('#i-question').fill("Will the named public indicator exceed its stated threshold?");
+ await page.locator('#i-targetDate').fill("2027-02-01");
+ await page.locator('#i-probability').fill("55");
+ await page.locator('#i-resolutionRule').fill("An original dated public report confirms the exact threshold at the deadline.");
+ await page.locator('#i-disconfirming').fill("A primary dated source shows the threshold was not reached.");
+ await page.locator('#recordForm button[type="submit"]').click();
+ await page.locator('.item').filter({hasText:"Will the named public indicator exceed its stated threshold?"}).first().waitFor({timeout:7000});
  await page.locator('[data-nav="causal"]').click();
  await page.locator('[data-action="add-causal"]').click();
  await page.locator('#i-cause').fill("Illustrative supply constraint");
  await page.locator('#i-effect').fill("Possible change in supply cost");
  await page.locator('#i-mechanism').fill("A smaller supply may increase market clearing prices if demand stays constant.");
  await page.locator('#i-falsifier').fill("Additional available capacity offsets the original shortage.");
- console.log("Causal form validation:",JSON.stringify(await page.locator("#recordForm").evaluate(f=>({valid:f.checkValidity(),invalid:[...f.elements].filter(x=>x.willValidate&&!x.checkValidity()).map(x=>({name:x.name,value:x.value,message:x.validationMessage,tag:x.tagName}))}))));
  await page.locator('#recordForm button[type="submit"]').click();
- console.log("Causal form diagnostics:",JSON.stringify({
-  notification:await page.locator("#toast").innerText(),
-  remainingForm:await page.locator("#recordForm").count(),
-  causalCards:(await page.locator(".causal-card").allTextContents()).slice(-3),
-  localCount:await page.evaluate(()=>{const x=JSON.parse(localStorage.getItem("watchtower-os-public-v1")||"null");return x?.demo?.causal?.length??null;})
- }));
  await page.locator(".causal-card").filter({hasText:"Illustrative supply constraint"}).waitFor({timeout:5000});
  assert.equal(failures.length,0,failures.join("\n"));
  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
