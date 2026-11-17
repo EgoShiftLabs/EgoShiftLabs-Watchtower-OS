@@ -93,7 +93,7 @@ export function publicTrackSummary(track,now=new Date()){
  const right=key=>resolved.reduce((acc,r)=>acc+(r.resolution[key]===1?1:0),0);
  return {schema:SUMMARY_SCHEMA,policy:POLICY,generatedAt:now.toISOString(),created:records.length,open:open.length,resolved:resolved.length,unresolvedMissingData:missing.length,
   evaluated:resolved.length,accuracy:resolved.length?{persistence:right("persistenceCorrect")/resolved.length,rollingMean7:right("rollingMeanCorrect")/resolved.length}:null,
-  recentRecords:records.slice(-18).reverse().map(r=>({id:r.id,createdAt:r.createdAt,question:r.question,sourceName:r.sourceName,sourceUrl:r.binding.sourceUrl,
+  recentRecords:records.slice(-18).reverse().map(r=>({id:r.id,createdAt:r.createdAt,question:r.question,sourceName:r.sourceName,sourceUrl:r.binding.sourceUrl,sourceRetrievedAt:r.sourceRetrievedAt,
    originalObservationDate:r.binding.originalObservationDate,originalValue:r.binding.originalValue,threshold:r.binding.threshold,unit:r.binding.unit,
    targetDate:r.binding.targetDate,status:r.status,persistenceCall:r.modelCalls.persistence,rollingMeanCall:r.modelCalls.rollingMean7,
    outcome:r.resolution?.outcome??null,outcomeObservationDate:r.resolution?.observationDate||null,outcomeValue:r.resolution?.value??null})),

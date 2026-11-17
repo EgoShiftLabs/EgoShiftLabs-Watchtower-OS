@@ -25,6 +25,7 @@ try{
  await page.locator('#oilCsv').setInputFiles({name:"wti-research.csv",mimeType:"text/csv",buffer:Buffer.from("date,value\n2026-10-01,72\n2026-10-02,73\n2026-10-03,71\n2026-10-04,74")});
  await page.locator("h2").filter({hasText:"WTI or oil prices: manually imported CSV"}).waitFor({timeout:7000});
  await page.locator('[data-nav="forecast"]').click();
+ assert.ok(await page.locator('h2').filter({hasText:"Public baseline forecast track record"}).count(),"Public precommitted research section required");
  await page.locator('[data-action="add-forecast"]').click();
  await page.locator('#i-question').fill("Will the named public indicator exceed its stated threshold?");
  await page.locator('#i-targetDate').fill("2027-02-01");

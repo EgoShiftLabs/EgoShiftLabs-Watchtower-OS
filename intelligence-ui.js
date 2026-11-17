@@ -106,3 +106,32 @@ export function chiefMarkdown(brief,history,workspace){
  lines.push("","## Open research questions",...(brief?.researchQuestions||[]).map(x=>"- "+x),"","## Limitations",...(brief?.limitations||[]).map(x=>"- "+x));
  return lines.join("\n");
 }
+
+export function renderPublicTrack(summary){
+ const ok=summary?.schema==="watchtower-public-track-summary-v1"&&Number.isInteger(summary.created)&&Array.isArray(summary.recentRecords);
+ const rows=ok?summary.recentRecords.slice(0,12):[];
+ const stats=ok?summary:null;
+ return '<section class="panel mt"><div class="panel-title"><h2>Public baseline forecast track record</h2>'+label(ok?"PRECOMMITTED / PUBLIC":"NOT CONFIGURED",ok?"green":"amber")+'</div>'+
+ '<p class="panel-sub">Watchtower automatically registers a small weekly set of REAL, source-linked questions with deterministic persistence and trailing-mean YES/NO calls. These are <b>not your personal forecasts</b>, not AI probabilities, and not evidence of proven prediction skill.</p>'+
+ '<div class="grid three mt">'+
+ stat("PUBLIC QUESTIONS",stats?String(stats.created):"—","Registered in Git history")+
+ stat("AWAITING OUTCOME",stats?String(stats.open):"—","Future original-source checks")+
+ stat("RESOLVED / MISSING",stats?stats.resolved+" / "+stats.unresolvedMissingData:"—","Unpublished outcomes never count as NO")+
+ '</div>'+
+ (stats?.resolved?'<div class="grid two mt">'+
+ stat("PERSISTENCE HIT RATE",Math.round(stats.accuracy.persistence*100)+"%","n="+stats.resolved+" resolved; YES/NO only")+
+ stat("7-OBS MEAN HIT RATE",Math.round(stats.accuracy.rollingMean7*100)+"%","n="+stats.resolved+" resolved; same questions")+'</div>':
+ '<div class="note mt">No public outcomes are resolved yet. The first cohort is committed BEFORE its targets mature. We will report measured results only when the qualifying official observations exist.</div>')+
+ (stats?.resolved&&stats.resolved<30?'<p class="small mt"><b>Small-sample warning:</b> fewer than 30 resolved questions; they also share underlying series and horizons, so they are not independent evidence of predictive ability.</p>':'')+
+ (rows.length?'<div class="card-list mt">'+rows.map(r=>
+ '<article class="item"><div class="item-body"><div class="badge-row">'+label(r.status==="resolved"?"OFFICIAL OUTCOME RECORDED":r.status==="unresolved-missing-data"?"MISSING OFFICIAL DATA":"PRECOMMITTED / OPEN",r.status==="resolved"?"green":"amber")+'</div>'+
+ '<h3 class="mt">'+p(r.question)+'</h3>'+
+ '<div class="item-meta">Created '+p(r.createdAt)+' · Original reading '+p(r.originalObservationDate)+' · Retrieved '+p(r.sourceRetrievedAt||"Unknown")+' · Due '+p(r.targetDate)+'</div>'+
+ '<p><b>Original observed value:</b> '+p(r.originalValue)+' '+p(r.unit)+
+ ' · <b>Mechanical persistence:</b> '+p(r.persistenceCall===1?"YES":"NO")+
+ ' · <b>7-observation mean:</b> '+p(r.rollingMeanCall===1?"YES":"NO")+'</p>'+
+ (r.status==="resolved"?'<p><b>Resolved value:</b> '+p(r.outcomeValue)+' '+p(r.unit)+' on '+p(r.outcomeObservationDate)+' → '+p(r.outcome===1?"YES":"NO")+'</p>':'')+
+ '<p class="small">'+link(r.sourceUrl,r.sourceName)+'</p></div></article>').join("")+'</div>':
+ '<div class="empty mt">The public forecast collector has not issued its first source-backed cohort yet. Check the scheduled GitHub Actions run and original data freshness.</div>')+
+ '<p class="small mt">'+link("https://github.com/EgoShiftLabs/EgoShiftLabs-Watchtower-OS/blob/main/data/public-forecast-track.json","Inspect the public, Git-versioned original records")+' · '+link("https://github.com/EgoShiftLabs/EgoShiftLabs-Watchtower-OS/blob/main/docs/PUBLIC_FORECAST_TRACK.md","Read experiment methods")+'</p></section>';
+}

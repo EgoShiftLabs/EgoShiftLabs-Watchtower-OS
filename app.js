@@ -2,7 +2,7 @@ import {VERSION,SCHEMA,DOMAINS,ROLES,MODULES,esc,text,safeUrl,uid,isDate,freshne
 import {DEMO} from "./seed.js";
 import {safeSeries,csvPricePoints,normalizePoints} from "./analytics.js";
 import {bindThreshold,evaluateThreshold,validateThresholdBinding,thresholdQuestion,templateOptions,COMPARATORS} from "./thresholds.js";
-import {renderEnergy,renderPatterns,renderCausal,renderChief,chiefMarkdown} from "./intelligence-ui.js";
+import {renderEnergy,renderPatterns,renderCausal,renderChief,chiefMarkdown,renderPublicTrack} from "./intelligence-ui.js";
 
 const KEY="watchtower-os-public-v1";
 const root=document.getElementById("content"),modalRoot=document.getElementById("modalRoot");
@@ -18,6 +18,7 @@ let publicIntel={schema:"watchtower-public-intel-v1",status:"loading",retrievedA
 let publicHistory={schema:"watchtower-history-v1",status:"loading",retrievedAt:null,series:[],energy:{status:"needs_key"}};
 let chiefPublic={schema:"watchtower-chief-brief-v1",status:"loading",items:[],baselines:[],researchQuestions:[]};
 let selectedPatternId="";
+let publicTrackSummaryData={schema:"watchtower-public-track-summary-v1",created:null,recentRecords:[]};
 function work(){return state[state.mode];}
 function activeView(){const v=location.hash.slice(1);return MODULES.some(m=>m[0]===v)?v:"command";}
 function formatDate(s){if(!s)return "Unscheduled";if(!isDate(s))return "Unknown";return new Date(s+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"});}
@@ -68,6 +69,16 @@ function publicIntelPanel(){
  (ready?'<p class="small mt">Retrieved '+esc(new Date(d.retrievedAt).toLocaleString())+(stale?' · Snapshot too old for current conditions.':'')+'</p>':'<p class="panel-sub mt">The public data adapter is not connected yet. The published JSON explicitly shows an unconfigured state; no fabricated observations are supplied.</p>')+
  (observations.length?'<div class="card-list mt">'+observations.map(x=>'<div class="item"><div class="item-body"><div class="badge-row">'+tag("ORIGINAL PUBLIC SOURCE","green")+' '+tag("OBSERVATION "+freshness(x.observationDate).toUpperCase(),freshness(x.observationDate)==="stale"?"amber":"muted")+'</div><h3 class="mt">'+esc(x.label)+'</h3><p><strong>'+esc(x.value)+'</strong> '+esc(x.unit||"")+(typeof x.changePct==="number"?' · Change since previous published record: '+esc(x.changePct>0?"+":"")+esc(x.changePct.toFixed(3))+"%":"")+'</p><div class="item-meta">Observation date '+esc(x.observationDate)+' · Source lag: '+esc(sourceLag(x.observationDate,d.retrievedAt)??"unknown")+' day(s) · '+esc(x.sourceName||"Original source")+' · <a class="text-link" rel="noopener noreferrer" target="_blank" href="'+esc(safeUrl(x.sourceUrl))+'">Source ↗</a></div></div></div>').join("")+'</div>':'<div class="empty mt">No public observations available. A permitted, verified data source is not connected yet.</div>')+
  '<p class="small mt"><a class="text-link" href="docs/PUBLIC_INTELLIGENCE.md" target="_blank" rel="noopener noreferrer">Read public-feed contract ↗</a></p></section>';
+}
+async function loadPublicTrackSummary(){
+ try{
+  const res=await fetch("./data/public-forecast-summary.json",{cache:"no-store"});
+  if(!res.ok)throw Error("Public research track not yet published");
+  const body=await res.json();
+  if(body.schema!=="watchtower-public-track-summary-v1"||!Number.isInteger(body.created)||!Array.isArray(body.recentRecords)||body.recentRecords.length>18)throw Error("Invalid public forecast summary schema");
+  publicTrackSummaryData=body;
+ }catch(e){console.warn("Public baseline track unavailable:",e);publicTrackSummaryData={schema:"watchtower-public-track-summary-v1",created:null,recentRecords:[]};}
+ if(activeView()==="forecast")render();
 }
 async function loadExtendedIntel(){
  const read=async(path,schema)=>{
@@ -131,7 +142,7 @@ return '<div class="panel mt" id="scenarioStudio"><div class="panel-title"><h2>S
 function renderForecast(){const w=work(),cal=calibration(w.forecasts),open=[...w.forecasts].filter(f=>f.status!=="resolved"),closed=[...w.forecasts].filter(f=>f.status==="resolved");
 const cards=arr=>recordList(arr,f=>'<article class="item"><div class="item-body"><div class="badge-row">'+flag(f)+' '+tag(f.status==="resolved"?"RESOLVED":"PENDING",f.status==="resolved"?"green":"amber")+'</div><h3 class="mt">'+esc(f.question)+'</h3><p>'+esc(f.rationale||"No rationale recorded.")+'</p><div class="item-meta">Resolution deadline '+esc(formatDate(f.targetDate))+' · '+(f.probability===null||f.probability===""?"No probability entered":"Human estimate: "+esc(f.probability)+"%")+'</div>'+'<div class="item-meta">Evidence: '+gradeTag(f)+' · Integrity: '+esc(forecastIntegrity(f).status)+'</div>'+(f.binding?'<div class="item-meta">OFFICIAL-SERIES THRESHOLD · '+esc(f.binding.seriesLabel)+' · '+esc(f.binding.comparator)+' '+esc(f.binding.threshold)+' '+esc(f.binding.unit)+' · Persistence: '+(f.binding.persistenceCall?"YES":"NO")+' (not odds)</div>':'')+
 (f.status==="resolved"?'<p class="mt"><b>Observed outcome:</b> '+(f.outcome===1?"YES":"NO")+' · Human Brier: '+(f.brier==null?"Unscored":Number(f.brier).toFixed(3))+(f.binding?' · Persistence baseline: '+(f.baselineCorrect===1?"CORRECT":f.baselineCorrect===0?"INCORRECT":"NOT CHECKED"):'')+'</p>':"")+'</div><div class="item-actions">'+btn("Inspect","view-forecast",f.id,"btn-sm btn-ghost")+(f.status!=="resolved"?btn("Resolve","resolve-forecast",f.id,"btn-sm"):"")+'</div></article>',"Nothing recorded here yet.");
-return header("FORECAST ENGINE / OUTCOME ACCOUNTABILITY","Forecast lab.","Make falsifiable predictions, model conditional scenarios and compare what you expected with what actually happened.",btn("＋ Source-linked forecast","new-threshold","","btn-primary")+btn("＋ General forecast","add-forecast"))+modeNote()+
+return header("FORECAST ENGINE / OUTCOME ACCOUNTABILITY","Forecast lab.","Make falsifiable predictions, model conditional scenarios and compare what you expected with what actually happened.",btn("＋ Source-linked forecast","new-threshold","","btn-primary")+btn("＋ General forecast","add-forecast"))+modeNote()+renderPublicTrack(publicTrackSummaryData)+
 '<div class="grid metrics mt">'+stat("PENDING FORECASTS",String(open.length),"Awaiting observable outcomes","⌁")+stat("OVERDUE / REAL",String(cal.overdue),"Past-deadline unresolved outcomes","⌁")+stat("LOCALLY SCORED",String(cal.count),"Self-reported outcomes; unscored: "+cal.unscored,"◈")+stat("MEAN BRIER SCORE",cal.mean==null?"—":cal.mean.toFixed(3),"50% reference: "+(cal.referenceMean===null?"—":"0.250")+"; n="+cal.count,"◎")+'</div>'+
 note('<b>Forecast integrity:</b> New records keep an original snapshot and event history, enforced by the app; browser storage and JSON exports are NOT tamper-proof. Probabilities remain subjective human estimates, and a fixed 50% reference is not a calibrated base-rate model.')+
 '<div class="panel mt"><div class="panel-title"><h2>Resolution discipline</h2>'+tag("NO VERIFIED PREDICTOR","amber")+'</div><div class="grid three">'+stat("EXPIRED UNRESOLVED",String(cal.overdue),"Backlog reduces confidence in skill claims","⌛")+stat("RESOLVED BUT UNSCORED",String(cal.unscored),"Legacy, incomplete or integrity issues","⚠")+stat("50% REFERENCE",cal.referenceMean===null?"—":cal.referenceMean.toFixed(3),"Uninformed baseline; same scored questions","◉")+'</div><p class="small mt">Resolution coverage (scored records vs overdue backlog): '+(cal.resolutionRate===null?"Insufficient records":Math.round(cal.resolutionRate*100)+"%")+'. This is not an evaluation of forecasting skill; proper comparison needs baseline frequencies and enough independently resolved outcomes.</p></div>'+
@@ -374,3 +385,4 @@ window.addEventListener("hashchange",render);
 render();
 loadPublicIntel();
 loadExtendedIntel();
+loadPublicTrackSummary();
