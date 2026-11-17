@@ -1,11 +1,12 @@
 {
   "name": "watchtower-os",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "type": "module",
   "private": true,
   "scripts": {
-    "check": "node --check core.js && node --check seed.js && node --check app.js && npm run check:intel",
+    "check": "node --check core.js && node --check seed.js && node --check app.js && npm run check:intel && npm run check:history",
     "test": "node --test tests/*.test.js",
-    "check:intel": "node scripts/check-public-intel.mjs"
+    "check:intel": "node scripts/check-public-intel.mjs",
+    "check:history": "node scripts/check-history.mjs"
   }
 }

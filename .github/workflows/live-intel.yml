@@ -8,6 +8,8 @@ on:
     paths:
       - 'scripts/official-normalizers.mjs'
       - 'scripts/collect-official.mjs'
+      - 'scripts/historical-build.mjs'
+      - 'scripts/brief-builder.mjs'
       - '.github/workflows/live-intel.yml'
 permissions:
   contents: write
@@ -28,20 +30,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Get official observations (fail closed on source errors)
+      - name: Import EIA API key from encrypted repository secret (optional)
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+        run: echo "Optional energy adapter is configured only when the secret exists."
+      - name: Get official observations (fail closed on mandatory source errors)
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
         run: |
           node scripts/collect-official.mjs
           npm run check:intel
+          npm run check:history
           npm test
       - name: Commit validated public-only snapshot
         run: |
           git config user.name 'watchtower-data-bot'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/public-intel.json
+          git add data/public-intel.json data/history.json data/chief-public-brief.json
           if git diff --staged --quiet; then
             echo "No updated public observations."
           else
-            git commit -m "data: update Treasury and USGS public observations"
+            git commit -m "data: refresh official indicators, historical series and public CHIEF brief"
             for attempt in 1 2 3 4 5; do
               git fetch origin '+refs/heads/main:refs/remotes/origin/main'
               git rebase refs/remotes/origin/main

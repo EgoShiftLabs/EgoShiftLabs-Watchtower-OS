@@ -49,7 +49,7 @@ export function buildHistory(treasury,eia,energyStatus="needs_key",now=new Date(
  }
  for(const s of series){if(s.points.length>366)throw Error("Too much history.");if(s.points.length<12)throw Error("Insufficient source history.");}
  return {schema:HISTORY_SCHEMA,status:"active",retrievedAt:now.toISOString(),series,
- energy:{status,lastRetrievedAt,note:status==="needs_key"?"EIA_API_KEY is not configured. Energy API was not called.":status==="stale"?"Previous WTI history retained, but current EIA refresh failed or is disabled.":"WTI series retrieved from EIA API v2. No predictive probabilities."},
+ energy:{status,lastRetrievedAt,note:status==="needs_key"?"EIA_API_KEY is not configured. Energy API was not called.":status==="stale"?"Previous WTI history retained, but the current EIA refresh failed or is disabled.":status==="source_error"?"EIA API attempted but unavailable; no valid WTI history was published.":"WTI series retrieved from EIA API v2. No predictive probabilities."},
  note:"Historical public observations and lagged one-step descriptive baselines only; never financial advice or predictive certainty."};
 }
 export function buildChiefPublicBrief(feed,history,now=new Date()){
