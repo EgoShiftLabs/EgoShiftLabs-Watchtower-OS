@@ -35,7 +35,7 @@ try{
  assert.equal(created.status,"open");
  await page.locator('[data-action="resolve-forecast"][data-id="'+created.id+'"]').click();
  await page.locator('.modal').filter({hasText:"Target date has not yet arrived"}).waitFor();
- await page.locator('.modal [data-action="close-modal"]').click();
+ await page.locator('.modal [data-action="close-modal"]').first().click();
 
  // Substitute a test-only fake FUTURE observation in browser's fetch response.
  // No synthetic data is ever written to the repository's public data/history.json.
