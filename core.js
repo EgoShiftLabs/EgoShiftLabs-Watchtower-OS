@@ -20,12 +20,12 @@ export function isDate(x){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(x||"")))return f
 export function freshness(date,now=new Date()){if(!isDate(date))return "unknown";const days=Math.floor((now.getTime()-new Date(date+"T12:00:00Z").getTime())/86400000);return days>30?"stale":days>7?"aging":"recent";}
 export function sourceQuality(rec){return Boolean(rec&&!rec.demo&&safeUrl(rec.sourceUrl)&&(isDate(rec.observedAt)||isDate(rec.sourceCheckedAt))&&text(rec.evidence).length>=20);}
 export function brier(prob,outcome){if(prob===""||prob===null||prob===undefined)return null;const p=Number(prob);if(!Number.isFinite(p)||p<0||p>100||![0,1].includes(outcome))return null;return Math.pow(p/100-outcome,2);}
-export const ORIGINAL_FIELDS=["question","targetDate","probability","resolutionRule","disconfirming","sourceUrl","sourceType","sourceCheckedAt","evidence","rationale"];
-export function originalSnapshot(f){return Object.fromEntries(ORIGINAL_FIELDS.map(k=>[k,f[k]??null]));}
+export const ORIGINAL_FIELDS=["question","targetDate","probability","resolutionRule","disconfirming","sourceUrl","sourceType","sourceCheckedAt","evidence","rationale","binding"];
+export function originalSnapshot(f){return Object.fromEntries(ORIGINAL_FIELDS.map(k=>[k, k==="binding"&&f[k]?JSON.parse(JSON.stringify(f[k])):(f[k]??null)]));}
 export function forecastIntegrity(f){
  if(!f||typeof f!=="object")return {status:"invalid",ok:false};
  if(!f.original||!Array.isArray(f.timeline))return {status:"legacy",ok:false};
- const mismatch=ORIGINAL_FIELDS.some(k=>(f.original[k]??null)!==(f[k]??null));
+ const mismatch=ORIGINAL_FIELDS.some(k=>k==="binding"?JSON.stringify(f.original[k]??null)!==JSON.stringify(f[k]??null):(f.original[k]??null)!==(f[k]??null));
  const creation=f.timeline[0]?.type==="created"&&typeof f.timeline[0]?.at==="string"&&f.timeline[0].at===f.createdAt;
  const validEvents=f.timeline.every(e=>e&&["created","resolved"].includes(e.type)&&typeof e.at==="string");
  const resolutions=f.timeline.filter(e=>e.type==="resolved");
@@ -60,7 +60,7 @@ export function evidenceGrade(rec,now=new Date()){
  tone:age==="stale"?"amber":"green",age,sourced:true};
 }
 export function validateForecast(f){if(text(f.question,180).length<12)return "Write a testable, specific question (at least 12 characters).";if(!isDate(f.targetDate))return "Provide a valid outcome deadline.";if(text(f.resolutionRule).length<15)return "Define a measurable resolution rule (15+ characters).";if(text(f.disconfirming).length<10)return "Record a meaningful countercase / falsifier (10+ characters).";if(f.probability!==null&&f.probability!==""&&f.probability!==undefined&&(!Number.isInteger(Number(f.probability))||Number(f.probability)<0||Number(f.probability)>100))return "Probability must be an integer between 0 and 100.";return "";}
-export function canResolve(f,outcome,now=new Date()){return [0,1].includes(outcome)&&isDate(f.targetDate)&&(outcome===1||f.targetDate<=now.toISOString().slice(0,10));}
+export function canResolve(f,outcome,now=new Date()){return [0,1].includes(outcome)&&isDate(f.targetDate)&&(f.binding?f.targetDate<=now.toISOString().slice(0,10):(outcome===1||f.targetDate<=now.toISOString().slice(0,10)));}
 export function resolveForecast(f,outcome,evidence,now=new Date()){
  if(f?.status==="resolved")return {error:"This forecast is already resolved. Resolutions cannot be overwritten."};
  if(f?.original&&!forecastIntegrity(f).ok)return {error:"Original forecast fields or history changed. Review the record before resolving."};
@@ -84,6 +84,12 @@ export function validWorkspace(x){
      if(w[field].some(rec=>!rec||typeof rec!=="object"||Array.isArray(rec)||typeof rec.id!=="string"||rec.id.length>100))return false;
    }
    if(w.forecasts.some(f=>f.original&&!forecastIntegrity(f).ok))return false;
+   if(w.forecasts.some(f=>f.binding&&(!f.original||typeof f.binding!=="object"||f.binding.schema!=="watchtower-threshold-v1"||typeof f.binding.seriesId!=="string")))return false;
+   if(w.causal!==undefined){if(!Array.isArray(w.causal)||w.causal.length>250||w.causal.some(r=>!r||typeof r.id!=="string"||typeof r.cause!=="string"||r.cause.length>250||typeof r.effect!=="string"||r.effect.length>250||typeof r.mechanism!=="string"||r.mechanism.length>2500||typeof r.falsifier!=="string"||r.falsifier.length>2500))return false;}
+   if(w.localOil!==undefined&&w.localOil!==null){
+     const oil=w.localOil;
+     if(typeof oil!=="object"||!Array.isArray(oil.points)||oil.points.length<3||oil.points.length>499||oil.points.some(p=>!p||!isDate(p.date)||typeof p.value!=="number"||!Number.isFinite(p.value)||p.value<=0||p.value>1e7))return false;
+   }
    if(mode==="live"&&w.forecasts.some(f=>f.demo))return false;
  }
  try{return JSON.stringify(x).length<=1024*1024;}catch{return false;}
