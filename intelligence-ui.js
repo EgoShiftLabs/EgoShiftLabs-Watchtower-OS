@@ -14,7 +14,12 @@ function graph(s){
  const pts=normalizePoints(s.points),min=Math.min(...pts.map(x=>x.value)),max=Math.max(...pts.map(x=>x.value));
  return '<div class="intel-graph" role="group" aria-label="Historical observation chart"><svg viewBox="0 0 540 160" role="img" aria-label="'+p(s.label)+' historical trend, '+pts.length+' observations; minimum '+p(numeric(min))+', maximum '+p(numeric(max))+'"><line x1="0" y1="152" x2="540" y2="152" stroke="#355265" stroke-width="1"/><polyline points="'+coords+'" fill="none" stroke="#77e6ca" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/></svg><div class="graph-caption"><span>'+p(pts[0].date)+'</span><span>'+p(pts.at(-1).date)+'</span></div></div>';
 }
-function analyticsCard(s){
+function lagDays(observed,retrievedAt){
+ if(!observed||!retrievedAt)return null;
+ const ms=Date.parse(retrievedAt)-Date.parse(observed+"T00:00:00Z");
+ return Number.isFinite(ms)&&ms>=0?Math.floor(ms/86400000):null;
+}
+function analyticsCard(s,retrievedAt=null){
  const st=historyStats(s.points,7);
  const back=st.backtest||{};
  return '<section class="panel"><div class="panel-title"><h2>'+p(s.label)+'</h2>'+label("DESCRIPTIVE, NOT PREDICTIVE","amber")+'</div><div class="badge-row">'+label(p(s.sourceName),"green")+label(p(s.unit))+'</div>'+graph(s)+
@@ -25,7 +30,9 @@ function analyticsCard(s){
  stat("PERSISTENCE MAE",numeric(back.persistenceMae,s.unit),"One-step historical absolute error")+
  stat("ROLLING MEAN MAE",numeric(back.rollingMae,s.unit),"One-step 7-observation error")+'</div>'+
  '<div class="intel-note mt">Walk-forward evaluated on '+p(back.count||0)+' historical points. Both baselines use only preceding observations, with no model fitting or future information. Lower MAE is better on THIS series and evaluation window; neither baseline is an investment probability.</div>'+
- '<p class="small mt">Source: '+link(s.sourceUrl,s.sourceName)+' · '+p(s.frequency||"observational")+' · '+p(s.method||"Original dated public observations")+'</p></section>';
+ '<p class="small mt">Source: '+link(s.sourceUrl,s.sourceName)+' · '+p(s.frequency||"observational")+' · '+p(s.method||"Original dated public observations")+'</p>'+
+ '<div class="note mt"><b>Observation date:</b> '+p(st.latest?.date||"Not available")+
+ (retrievedAt?' · <b>Retrieved:</b> '+p(retrievedAt)+' · <b>Source lag:</b> '+p(lagDays(st.latest?.date,retrievedAt)??"Unknown")+' calendar day(s)':' · User-supplied series; no verified retrieval timestamp')+'</div></section>';
 }
 export function renderPatterns(history,selectedId,localOil){
  const raw=history?.series||[],series=raw.filter(s=>safeSeries(s));
@@ -35,7 +42,7 @@ export function renderPatterns(history,selectedId,localOil){
  '<div class="note warning"><b>ANALYSIS ≠ FORECAST:</b> Trends, volatility and walk-forward historical errors describe past data. A low historical error does not ensure future reliability. Comparisons across unrelated indicators are not causal proof.</div>'+
  '<div class="grid two mt"><section class="panel"><h2>Choose a source series</h2><p class="panel-sub">Historical observations fetched by GitHub Actions. The collector does not access private journal records.</p><select class="select mt" id="patternSeries" aria-label="Select historical series">'+series.map(s=>'<option value="'+p(s.id)+'" '+(s.id===choice?.id?"selected":"")+'>'+p(s.label)+'</option>').join("")+'</select><p class="small mt">Collection status: '+p(status(history))+' · Last fetch: '+p(history?.retrievedAt||"No completed collection")+'</p></section>'+
  '<section class="panel"><h2>What is being tested?</h2><div class="kv"><span>Persistence</span><strong>Next = previous observation</strong></div><div class="kv"><span>Rolling mean</span><strong>Next = mean of previous 7</strong></div><div class="kv"><span>Evaluation</span><strong>Walk-forward one step; MAE</strong></div><div class="kv"><span>Calibrated probabilities</span><strong>None</strong></div></section></div>'+
- '<div class="mt">'+(choice?analyticsCard(choice):empty("No historical series has been published yet. The official-source collector must complete successfully."))+'</div>';
+ '<div class="mt">'+(choice?analyticsCard(choice,choice.id==="local-oil-csv"?null:history?.retrievedAt):empty("No historical series has been published yet. The official-source collector must complete successfully."))+'</div>';
 }
 export function renderEnergy(history,localOil){
  const e=history?.energy||{status:"needs_key"};
@@ -48,7 +55,7 @@ export function renderEnergy(history,localOil){
  '<div class="note warning"><b>SUPPLY & DEMAND RESEARCH ONLY:</b> No current EIA WTI series is shown unless the source was successfully fetched. Historical changes do not imply individual oil stocks will rise or fall.</div>'+
  '<div class="grid two mt"><section class="panel"><div class="panel-title"><h2>EIA WTI connector</h2>'+label(config,pub?"green":"amber")+'</div><p class="panel-sub">'+p(e.note||"EIA API v2 requires a key configured in GitHub Actions secrets.")+'</p><div class="kv"><span>Original publisher</span><strong>U.S. Energy Information Administration</strong></div><div class="kv"><span>Oil benchmark</span><strong>WTI Cushing spot ($/barrel)</strong></div><div class="kv"><span>Last EIA fetch</span><strong>'+p(e.lastRetrievedAt||"Not connected")+'</strong></div><p class="small mt">'+link("https://www.eia.gov/opendata/register.php","Register for a free EIA API key")+' · '+link("https://github.com/EgoShiftLabs/EgoShiftLabs-Watchtower-OS/settings/secrets/actions","Add EIA_API_KEY in repository secrets")+'</p></section>'+
  '<section class="panel"><h2>Analyze without credentials</h2><p class="panel-sub">Download public oil-price CSV from a legitimate source and import exactly two columns: <code>date,value</code>, one YYYY-MM-DD and positive USD/barrel value per line. This CSV stays on your device. Treat supplied data as unverified.</p><label class="btn btn-primary mt" for="oilCsv">Import local oil-price CSV</label><input class="file-input" type="file" id="oilCsv" accept=".csv,text/csv"><p class="small mt">No trades, brokerage access or market advice. Only dated arithmetic and historical baseline comparison.</p></section></div>'+
- (active?'<div class="mt">'+analyticsCard(active)+'</div>':empty("No actual WTI historical prices available. Add an EIA API key to activate automatic ingestion, or import a dated public-price CSV to analyze locally."))+
+ (active?'<div class="mt">'+analyticsCard(active,pub?e.lastRetrievedAt:null)+'</div>':empty("No actual WTI historical prices available. Add an EIA API key to activate automatic ingestion, or import a dated public-price CSV to analyze locally."))+
  '<div class="panel mt"><h2>Energy research checklist</h2><p class="panel-sub">Compare crude supply, inventories, consumption, OPEC policy, shipping disruption and the dollar as distinct pieces of evidence. Watchtower does not yet fetch all these factors and cannot estimate a statistically calibrated 90-day oil-price probability.</p><div class="badge-row">'+label("SUPPLY / HYPOTHESIS")+label("DEMAND / HYPOTHESIS")+label("STOCKS ≠ COMMODITY")+label("INVESTMENT DECISION / USER")+'</div></div>';
 }
 const LINKS=[
@@ -71,6 +78,8 @@ export function renderChief(brief,history,liveRecords,demoMode){
  const local=!demoMode&&liveRecords?liveRecords:{decisions:[],forecasts:[],projects:[]};
  const due=(local.decisions||[]).filter(x=>x.status==="open"&&x.reviewDate&&x.reviewDate<=new Date().toISOString().slice(0,10)).slice(0,10);
  const overdue=(local.forecasts||[]).filter(x=>x.status==="open"&&x.targetDate&&x.targetDate<new Date().toISOString().slice(0,10)).slice(0,10);
+ const horizon=new Date();horizon.setUTCDate(horizon.getUTCDate()+14);
+ const soon=(local.forecasts||[]).filter(x=>x.status==="open"&&x.targetDate&&x.targetDate>=new Date().toISOString().slice(0,10)&&x.targetDate<=horizon.toISOString().slice(0,10)).slice(0,10);
  return '<section class="intel-header"><div><div class="eyebrow">CHIEF / SOURCE-BACKED EXECUTIVE SUMMARY</div><h1>Intelligence Brief.</h1><p>A deterministic, sourced weekly-style briefing of public observations plus optional LOCAL decision reminders. CHIEF is not currently an AI inference agent.</p></div><div class="head-actions"><button class="btn btn-primary" type="button" data-action="export-chief">↓ Export briefing</button></div></section>'+
  '<div class="note"><b>AUTOMATIC PUBLIC BRIEF:</b> The GitHub collector summarizes observed numerical changes and simple baseline evaluation. Your browser-local forecasts and decisions are added only on this device when you view or export the briefing; they are never sent to the public repository.</div>'+
  '<div class="grid three mt">'+stat("PUBLIC OBSERVATIONS",String(publicRows.length),"Source-backed numerical records")+stat("LOCAL DECISIONS DUE",String(due.length),"Private browser-only reminders")+stat("LOCAL OVERDUE FORECASTS",String(overdue.length),"Unresolved process backlog")+'</div>'+
@@ -78,6 +87,7 @@ export function renderChief(brief,history,liveRecords,demoMode){
  (publicRows.length?'<div class="card-list mt">'+publicRows.slice(0,10).map(x=>'<div class="item"><div class="item-body"><h3>'+p(x.title)+'</h3><p>'+p(x.finding)+'</p><p class="item-meta">'+p(x.observationDate)+' · '+link(x.sourceUrl,x.sourceName)+'</p></div></div>').join("")+'</div>':empty("The official collector has not yet published an active CHIEF public brief."))+'</section>'+
  '<section class="panel"><h2>Local decision queue</h2><p class="panel-sub">Data shown here only comes from your current browser workspace. No automatic server access.</p>'+
  (due.length?due.map(x=>'<div class="kv"><span>'+p(x.title)+'</span><strong>'+p(x.reviewDate)+'</strong></div>').join(""):empty(demoMode?"Switch to LOCAL WORKSPACE for your private decision queue.":"No decisions due."))+
+ '<h3 class="mt">Forecasts due within 14 days</h3>'+(soon.length?soon.map(x=>'<div class="kv"><span>'+p(x.question)+'</span><strong>'+p(x.targetDate)+'</strong></div>').join(""):empty("No local forecasts due in the next 14 days."))+
  '<h3 class="mt">Overdue forecast outcomes</h3>'+(overdue.length?overdue.map(x=>'<div class="kv"><span>'+p(x.question)+'</span><strong>'+p(x.targetDate)+'</strong></div>').join(""):empty("No overdue local forecasts."))+'</section></div>'+
  '<div class="panel mt"><h2>CHIEF questions worth answering</h2><div class="card-list">'+(brief?.researchQuestions||[]).map((q,i)=>'<div class="item"><div class="item-body"><span class="mini-label">CHECK '+String(i+1).padStart(2,"0")+'</span><p>'+p(q)+'</p></div></div>').join("")+'</div><p class="small mt">CHIEF cannot independently determine why an indicator moved. That requires sourced research, causal testing and human review.</p></div>';
 }
@@ -88,6 +98,9 @@ export function chiefMarkdown(brief,history,workspace){
  for(const x of brief?.baselines||[]){lines.push("- "+x.id+": "+x.historyCount+" points; persistence MAE "+(x.persistenceMae??"n/a")+"; rolling MAE "+(x.rollingMae??"n/a")+"; evaluated "+(x.evaluationCount??0)+" steps");}
  lines.push("","## Local decision checkpoints (not uploaded)");
  for(const x of workspace?.decisions||[])if(x.status==="open")lines.push("- "+x.title+" · review "+(x.reviewDate||"unscheduled")+" · "+(x.nextAction||""));
+ lines.push("","## Local forecasts due in 14 days (not uploaded)");
+ const horizon=new Date();horizon.setUTCDate(horizon.getUTCDate()+14);
+ for(const x of workspace?.forecasts||[])if(x.status==="open"&&x.targetDate&&x.targetDate>=new Date().toISOString().slice(0,10)&&x.targetDate<=horizon.toISOString().slice(0,10))lines.push("- "+x.question+" · due "+x.targetDate);
  lines.push("","## Local overdue forecasts (not uploaded)");
  for(const x of workspace?.forecasts||[])if(x.status==="open"&&x.targetDate&&x.targetDate<new Date().toISOString().slice(0,10))lines.push("- "+x.question+" · deadline "+x.targetDate);
  lines.push("","## Open research questions",...(brief?.researchQuestions||[]).map(x=>"- "+x),"","## Limitations",...(brief?.limitations||[]).map(x=>"- "+x));

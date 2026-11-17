@@ -1,4 +1,4 @@
-export const VERSION="0.3.0";
+export const VERSION="0.4.0";
 export const SCHEMA="watchtower-os-v1";
 export const DOMAINS=["Geopolitics","Economy","Energy","Technology","Financial markets","Supply chains","Public policy","Resilience","Other"];
 export const ROLES=[
@@ -85,6 +85,7 @@ export function validWorkspace(x){
    }
    if(w.forecasts.some(f=>f.original&&!forecastIntegrity(f).ok))return false;
    if(w.forecasts.some(f=>f.binding&&(!f.original||typeof f.binding!=="object"||f.binding.schema!=="watchtower-threshold-v1"||typeof f.binding.seriesId!=="string")))return false;
+   if(w.decisions.some(dec=>dec.forecastId!==undefined&&dec.forecastId!==""&&(typeof dec.forecastId!=="string"||!w.forecasts.some(f=>f.id===dec.forecastId))))return false;
    if(w.causal!==undefined){if(!Array.isArray(w.causal)||w.causal.length>250||w.causal.some(r=>!r||typeof r.id!=="string"||typeof r.cause!=="string"||r.cause.length>250||typeof r.effect!=="string"||r.effect.length>250||typeof r.mechanism!=="string"||r.mechanism.length>2500||typeof r.falsifier!=="string"||r.falsifier.length>2500))return false;}
    if(w.localOil!==undefined&&w.localOil!==null){
      const oil=w.localOil;
