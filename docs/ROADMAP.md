@@ -57,3 +57,24 @@ Evidence-based event monitoring → causal analysis → accountable probabilisti
 
 ## Definition of success
 Not the number of dashboard cards. Demonstrate objectively improved user decisions and forecast calibration relative to transparent baselines, trustworthy privacy, paid willingness to use the product, and repeatable outcomes.
+
+## V0.2 — Trust and operational foundations (implemented in source; validate runtime)
+- [x] Original forecast field snapshots and application-level append-only created/resolved event history.
+- [x] Preserve past-deadline open backlog, exclude unsourced legacy/tampered records from scored calibration.
+- [x] Report sample count, mean Brier and a **fixed 50% uninformed reference** on exactly the same scored events; do not mistake it for a market/base-rate forecast.
+- [x] Label source classification as **self-reported** and show freshness; do not imply independent source authentication.
+- [x] Static no-JavaScript fallback and explicit limitations.
+- [x] Versioned, empty public-feed JSON contract and schema validation; manual workflow can verify structure.
+- [ ] Real authorized EIA/FRED or other data ingestion; NO connector is currently activated.
+- [ ] Independent browser-level keyboard/mobile tests, real file-import round-trips and screen-reader QA.
+- [ ] Server-backed tamper-evident log if regulatory-grade audit is later required. Browser localStorage and JSON cannot prove authenticity.
+
+### Next proof: demonstrate actual value, not forecasting theater
+- [ ] Record 20 real, externally sourced, dated forecasts with objective outcome rules; separately score resolved outcomes.
+- [ ] Investigate overdue unresolved forecasts and selective-reporting incentives.
+- [ ] Evaluate a single *named* historical public-data series as a baseline after verifying provider terms; publish observation and retrieval dates.
+- [ ] Add decision-to-forecast linkage and measure user time saved and demonstrated correction of mistakes.
+- [ ] Compare simple baseline models with the same outcome labels; report sample size and uncertainty.
+- [ ] Keep Watchtower Business and future Crypto Watchtower independent; suite integrations require explicit permission.
+
+**Known limitation:** Local browser logs cannot be made truly append-only for a user who edits localStorage or exported JSON. This release prevents ordinary UI rewriting and highlights inconsistent original snapshots; it is not a cryptographic audit system.

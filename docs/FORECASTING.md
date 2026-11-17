@@ -51,3 +51,10 @@ A NO outcome should only resolve after the event deadline, whereas a YES can res
 
 ## No misleading claims
 The V0.1 site contains no live forecasts, no tested model, no current news ingestion, no profit predictions and no executed financial transactions. Recommendations are future functionality and should be presented as alternatives and implications, not as guaranteed investment decisions.
+
+## Local integrity controls added in version 0.2
+New records store their original question, deadline, probability, resolution rule, falsifier, evidence and source references separately from final outcomes. The normal UI cannot edit originals or overwrite a resolved outcome. A local event history records creation and resolution. Inconsistent data imported into the app can be rejected.
+
+These are **application-level defenses only**. A person with access to their own browser storage or a JSON backup can rewrite all values and associated history; neither localStorage nor an unsigned export can prove true historical provenance. Real tamper-evidence requires a trusted timestamped external ledger, signed entries, or another independent witness.
+
+Resolved forecasts without a compatible original snapshot/history are excluded from the audit-ready scored count. The fixed 50% Brier reference of 0.250 is an intentionally weak comparison for all binary events, NOT a calibrated baseline for the event family or a claim of superior performance.

@@ -48,3 +48,10 @@ Run npm run check and npm test. GitHub Actions performs the same checks on commi
 
 ## Watchtower product family
 This personal intelligence operating system is separate from [Watchtower AI / business opportunities](https://github.com/EgoShiftLabs/Watchtower-AI) and any future crypto-specific Watchtower. Each has its own mission, deployment and data boundary. Future suite features must require explicit user consent before transferring any information between products.
+
+## 0.2 trust foundations
+- New human-created forecasts include an original-field snapshot and local create/resolve event history. The interface blocks ordinary original edits and double resolution; **localStorage is editable by the device owner**, so this is not cryptographic immutability.
+- Scored history displays the number of genuinely scored real records, overdue unresolved backlog, resolved-but-unscored records, mean Brier, and an explicitly labeled fixed 50% uninformed reference. That reference is not a tested event-specific baseline model.
+- Signals and forecasts display self-reported source classification and freshness. This is not independent source verification.
+- The [public intelligence feed](docs/PUBLIC_INTELLIGENCE.md) ships as an intentionally EMPTY, **unconfigured** JSON contract. A manual validation workflow exists; no EIA/FRED/news data is collected or modeled yet.
+- Static HTML remains useful when scripts fail, and CI validates source syntax, rules and the data contract.
