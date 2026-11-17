@@ -76,3 +76,8 @@ The existing repo now includes four integrated dashboard modules; each has an ho
 **To activate EIA WTI:** register at https://www.eia.gov/opendata/register.php and set the secret named `EIA_API_KEY` at https://github.com/EgoShiftLabs/EgoShiftLabs-Watchtower-OS/settings/secrets/actions . The existing scheduled workflow attempts the oil-price adapter only when the secret exists; it never commits the secret. After a completed workflow, confirm `data/history.json` displays `energy.status = active` and a documented original observation date.
 
 The current system is still a GitHub-hosted, publicly accessible prototype with browser-local, unencrypted user records. There is no secure login, real AI agent or validated predictive model. The static public CHIEF report is not a personalized AI recommendation.
+
+## V0.4 — Observable outcome threshold forecasts
+The Forecast Lab now supports [source-linked threshold forecasts](docs/THRESHOLD_FORECASTS.md) created from dated official time series, with locked original observations, a future threshold/date, a deterministic persistence YES/NO comparison, and user-confirmed first-eligible-observation outcome resolution. Human Brier score and deterministic persistence correctness are reported **separately**. CHIEF shows next-14-day forecast checkpoints, and decisions can optionally link to forecast IDs. Source observation dates and retrieval timestamps are displayed separately.
+
+The existing EIA WTI connection remains API-secret-gated; no WTI data or probabilistic predictions are claimed without a verified retrieval.

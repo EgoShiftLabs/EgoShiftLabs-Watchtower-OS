@@ -47,3 +47,24 @@ test("changed original creation timestamp or classification is detected",()=>{
  assert.equal(forecastIntegrity(y).ok,true);
  assert.equal(forecastIntegrity({...y,outcome:0}).status,"mismatch");
 });
+
+test("bound forecast original object is deep cloned and cannot be silently edited",()=>{
+ const x=blankWorkspace();
+ const source={schema:"watchtower-threshold-v1",seriesId:"treasury-total-debt",seriesLabel:"Debt stock",sourceUrl:"https://example.gov/data",unit:"USD trillions",originalObservationDate:"2026-11-17",originalValue:40,targetDate:"2026-11-22",threshold:40.5,comparator:"gte",persistenceCall:0,rule:"first-observation-on-or-after-target-within-7-calendar-days"};
+ const f=createForecastRecord({id:"bound",demo:false,question:"Will official indicator exceed stated threshold?",targetDate:"2026-11-22",resolutionRule:"First observed dated original source value.",disconfirming:"Official observed value is below threshold.",probability:55,binding:source},new Date("2026-11-17T11:00:00Z"));
+ assert.notEqual(f.binding,f.original.binding);assert.equal(forecastIntegrity(f).ok,true);
+ assert.equal(canResolve(f,1,new Date("2026-11-20T12:00:00Z")),false);
+ x.live.forecasts=[f];assert.equal(validWorkspace(x),true);
+ f.binding.threshold=900;assert.equal(forecastIntegrity(f).ok,false);assert.equal(validWorkspace(x),false);
+});
+test("linked decision must reference a forecast from the same workspace",()=>{
+ const x=blankWorkspace();x.live.decisions.push({id:"d",title:"Test",forecastId:"missing"});
+ assert.equal(validWorkspace(x),false);
+ x.live.decisions[0].forecastId="";
+ assert.equal(validWorkspace(x),true);
+});
+test("malformed causal and local oil imports are rejected without impacting old schemas",()=>{
+ const x=blankWorkspace();x.live.causal=[{id:"z",cause:"X",effect:"Y",mechanism:7,falsifier:"Unknown"}];assert.equal(validWorkspace(x),false);
+ x.live.causal=[];x.live.localOil={points:[{date:"not-a-date",value:0}]};assert.equal(validWorkspace(x),false);
+ x.live.localOil=null;assert.equal(validWorkspace(x),true);
+});

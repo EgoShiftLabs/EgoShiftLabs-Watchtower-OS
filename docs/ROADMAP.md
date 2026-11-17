@@ -104,3 +104,16 @@ Not the number of dashboard cards. Demonstrate objectively improved user decisio
 - [ ] Upgrade from 1-step history-only baseline MAE to out-of-sample evaluated 30/90-day horizons with uncertainty, if decision value justifies it.
 
 Source code implements data processing and local reasoning; the system does NOT have generalized forecast skill or personalized investment/trading recommendations.
+
+## V0.4 — Source-linked binary threshold workflow
+- [x] Verified schema and full module registry already present in V0.3 source; no wholesale schema break.
+- [x] New official-series threshold records preserve original source, observed value, threshold, deadline, optional human estimate, resolution rule and falsifier.
+- [x] First eligible original-source observation on/after deadline within seven calendar days is the only automated resolution candidate; no early settlement or arbitrary outcome selection.
+- [x] Persistence YES/NO baseline set at forecast creation and evaluated separately from human Brier.
+- [x] Decision Desk optional forecast-ID link; CHIEF upcoming 14-day forecast reminders remain browser-local.
+- [x] Observation-date versus retrieval-date/source lag displayed on official series.
+- [x] Source-bound workspace validation, unit tests and browser-only future-observation regression fixtures.
+- [ ] Independent actual browser acceptance and deployment confirmation for V0.4 after code changes.
+- [ ] EIA_API_KEY configuration and original WTI data verification (owner action required).
+- [ ] More rigorous resolution adjudication, verified records at longer horizons, and human-vs-model comparisons on statistically defensible equivalent targets.
+- [ ] Physical iPhone and screen-reader accessibility review; public deployment remains a browser-local prototype.

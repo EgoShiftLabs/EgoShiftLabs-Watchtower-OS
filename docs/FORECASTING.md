@@ -58,3 +58,8 @@ New records store their original question, deadline, probability, resolution rul
 These are **application-level defenses only**. A person with access to their own browser storage or a JSON backup can rewrite all values and associated history; neither localStorage nor an unsigned export can prove true historical provenance. Real tamper-evidence requires a trusted timestamped external ledger, signed entries, or another independent witness.
 
 Resolved forecasts without a compatible original snapshot/history are excluded from the audit-ready scored count. The fixed 50% Brier reference of 0.250 is an intentionally weak comparison for all binary events, NOT a calibrated baseline for the event family or a claim of superior performance.
+
+## Source-linked threshold forecasts — version 0.4
+For objective number-based outcomes, Watchtower can now bind the original human question to a particular public indicator, numeric threshold, date, dated source observation and original persistence comparison. The fixed settlement convention is the first observed source value ON OR AFTER the target date within seven calendar days. This is not a live statistical probability engine.
+
+The outcome is user-confirmed against the published source, and the human-estimated Brier score is distinct from the deterministic persistence YES/NO correctness. Missing data stays unresolved rather than silently scoring NO. See [THRESHOLD_FORECASTS.md](THRESHOLD_FORECASTS.md).

@@ -23,7 +23,7 @@ export function bindThreshold(series,targetDate,threshold,comparator,now=new Dat
  if(!safeSeries(series))return {error:"Only valid, sourced public time series can be selected."};
  const pts=normalizePoints(series.points),last=pts.at(-1),v=Number(threshold);
  if(!isDate(targetDate)||targetDate<=now.toISOString().slice(0,10)||targetDate<=last.date)return {error:"Target date must be in the future and after the latest published observation."};
- if(targetDate>plusDate(now.toISOString().slice(0,10),366))return {error:"Select a target date no more than one year away."};
+ if(targetDate>plusDate(now.toISOString().slice(0,10),90))return {error:"Select a target date no more than 90 days away."};
  if(typeof threshold==="string"&&!threshold.trim()||!Number.isFinite(v))return {error:"Enter a valid numerical threshold."};
  const baseline=thresholdCall(last.value,v,comparator);
  if(baseline===null)return {error:"Select an allowed comparison."};
