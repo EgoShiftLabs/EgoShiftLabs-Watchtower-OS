@@ -1,0 +1,12 @@
+{
+  "schema": "watchtower-history-v1",
+  "status": "unconfigured",
+  "retrievedAt": null,
+  "series": [],
+  "energy": {
+    "status": "needs_key",
+    "lastRetrievedAt": null,
+    "note": "EIA_API_KEY has not been configured in GitHub Actions."
+  },
+  "note": "History will only contain verified source observations."
+}

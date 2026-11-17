@@ -1,0 +1,12 @@
+{
+  "schema": "watchtower-chief-brief-v1",
+  "status": "unconfigured",
+  "generatedAt": null,
+  "title": "CHIEF Public Intelligence Digest",
+  "items": [],
+  "baselines": [],
+  "researchQuestions": [],
+  "limitations": [
+    "No public brief has been generated yet."
+  ]
+}

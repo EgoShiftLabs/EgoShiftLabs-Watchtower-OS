@@ -1,0 +1,12 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {treasuryHistory,eiaPriceHistory,eiaURL,buildHistory,buildChiefPublicBrief} from "../scripts/historical-build.mjs";
+const now=new Date("2026-11-17T18:00:00Z");
+const dates=Array.from({length:22},(_,i)=>{const d=new Date("2026-10-25T00:00:00Z");d.setUTCDate(d.getUTCDate()+i);return d.toISOString().slice(0,10);});
+const t={data:dates.map((record_date,i)=>({record_date,tot_pub_debt_out_amt:String(39000000000000+i*1e8),debt_held_public_amt:String(31000000000000+i*1e8)}))};
+const p={response:{data:dates.map((period,i)=>({period,series:"RWTC",value:String(75+i/10)}))}};
+test("real source history keeps dates and proper units",()=>{const a=treasuryHistory(t,now);assert.equal(a.length,2);assert.equal(a[0].points.length,22);assert.equal(a[0].unit,"USD trillions");});
+test("EIA api key is confined to constructed server-side URL, not data fields",()=>{const url=eiaURL("test-secret");assert.match(url,/api_key=test-secret/);assert.match(url,/RWTC/);assert.throws(()=>eiaURL(""),/missing/);});
+test("EIA normalization validates dates and sample size",()=>{const a=eiaPriceHistory(p,now);assert.equal(a.points.length,22);assert.equal(a.points.at(-1).value,77.1);assert.throws(()=>eiaPriceHistory({response:{data:[]}},now),/insufficient/);});
+test("optional energy integration has explicit needs_key and active conditions",()=>{const a=buildHistory(t,null,"needs_key",now);assert.equal(a.energy.status,"needs_key");assert.equal(a.series.length,2);const b=buildHistory(t,p,"needs_key",now);assert.equal(b.energy.status,"active");assert.equal(b.series.length,3);});
+test("public-only CHIEF brief has sourced observations and no user fields",()=>{const h=buildHistory(t,null,"needs_key",now);const feed={status:"active",observations:[{id:"public-1",label:"Public example",value:20,unit:"units",observationDate:"2026-11-17",sourceName:"Official",sourceUrl:"https://example.gov",changePct:0.3}]};const b=buildChiefPublicBrief(feed,h,now);assert.equal(b.items.length,1);assert.equal(b.baselines.length,2);assert.equal(b.status,"public-only");assert.equal(JSON.stringify(b).includes("personalProfile"),false);});
