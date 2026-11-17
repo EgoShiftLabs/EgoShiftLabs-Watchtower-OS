@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "check": "node --check core.js && node --check seed.js && node --check app.js",
-    "test": "node --test tests/*.test.js"
+    "check": "node --check core.js && node --check seed.js && node --check app.js && npm run check:intel",
+    "test": "node --test tests/*.test.js",
+    "check:intel": "node scripts/check-public-intel.mjs"
   }
 }

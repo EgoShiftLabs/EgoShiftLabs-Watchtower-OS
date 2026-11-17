@@ -1,0 +1,7 @@
+{
+  "schema": "watchtower-public-intel-v1",
+  "status": "unconfigured",
+  "retrievedAt": null,
+  "observations": [],
+  "notice": "No live public-data adapter connected; this intentionally empty feed is not current intelligence."
+}

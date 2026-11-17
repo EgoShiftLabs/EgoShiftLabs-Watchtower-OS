@@ -1,0 +1,17 @@
+name: Validate optional public intelligence feed (not connected)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-public-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm run check:intel
+      - run: |
+          echo "Validation only. No data provider, prediction model, scraper or alert is running."
+          echo "Add a rights-reviewed API adapter before enabling a real scheduled collection."
