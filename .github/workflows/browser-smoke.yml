@@ -10,6 +10,8 @@ on:
       - 'intelligence-ui.js'
       - 'analytics.js'
       - 'tests/browser-smoke.mjs'
+      - 'tests/threshold-browser.mjs'
+      - 'thresholds.js'
       - '.github/workflows/browser-smoke.yml'
   workflow_dispatch:
 permissions:
@@ -33,4 +35,6 @@ jobs:
           echo $! > /tmp/watchtower-http.pid
           sleep 2
       - name: Exercise dashboards in headless desktop and mobile viewport
-        run: node tests/browser-smoke.mjs
+        run: |
+          node tests/browser-smoke.mjs
+          node tests/threshold-browser.mjs
