@@ -26,7 +26,7 @@ test("future outcome resolves only after target date, from first eligible offici
  const first=makePublicTrack(history,emptyTrack(),asOf).track;
  const updated={...history,retrievedAt:"2026-11-25T16:00:00Z",series:history.series.map(s=>({...s,points:[...s.points,{date:"2026-11-25",value:s.points.at(-1).value+0.3}]}))};
  const next=makePublicTrack(updated,first,new Date("2026-11-25T17:00:00Z"));
- assert.equal(next.changes.registered,0);
+ assert.equal(next.changes.registered,4); // New calendar week starts a separate, clearly labeled cohort.
  assert.equal(next.changes.resolved,2);
  const resolved=next.track.records.filter(r=>r.status==="resolved");
  assert.equal(resolved.every(r=>r.resolution.observationDate==="2026-11-25"),true);
