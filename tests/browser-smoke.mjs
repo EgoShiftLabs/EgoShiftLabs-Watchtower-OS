@@ -28,7 +28,13 @@ try{
  await page.locator('#i-mechanism').fill("A smaller supply may increase market clearing prices if demand stays constant.");
  await page.locator('#i-falsifier').fill("Additional available capacity offsets the original shortage.");
  await page.locator('#recordForm button[type="submit"]').click();
- await page.locator(".causal-card").filter({hasText:"Illustrative supply constraint"}).waitFor();
+ console.log("Causal form diagnostics:",JSON.stringify({
+  notification:await page.locator("#toast").innerText(),
+  remainingForm:await page.locator("#recordForm").count(),
+  causalCards:(await page.locator(".causal-card").allTextContents()).slice(-3),
+  localCount:await page.evaluate(()=>{const x=JSON.parse(localStorage.getItem("watchtower-os-public-v1")||"null");return x?.demo?.causal?.length??null;})
+ }));
+ await page.locator(".causal-card").filter({hasText:"Illustrative supply constraint"}).waitFor({timeout:5000});
  assert.equal(failures.length,0,failures.join("\n"));
  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  mobile.on("pageerror",e=>failures.push("Mobile page error: "+e.message));
