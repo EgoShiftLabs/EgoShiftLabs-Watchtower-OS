@@ -42,8 +42,19 @@ jobs:
             echo "No updated public observations."
           else
             git commit -m "data: update Treasury and USGS public observations"
-            git pull --rebase origin main
-            git push origin HEAD:main
+            for attempt in 1 2 3 4 5; do
+              git fetch origin '+refs/heads/main:refs/remotes/origin/main'
+              git rebase refs/remotes/origin/main
+              if git push origin HEAD:main; then
+                echo "Public snapshot committed successfully"
+                break
+              fi
+              if [ "$attempt" -eq 5 ]; then
+                echo "Could not publish snapshot after 5 safe retries" >&2
+                exit 1
+              fi
+              sleep 2
+            done
           fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
