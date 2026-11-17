@@ -1,7 +1,52 @@
 {
   "schema": "watchtower-public-intel-v1",
-  "status": "unconfigured",
-  "retrievedAt": null,
-  "observations": [],
-  "notice": "No live public-data adapter connected; this intentionally empty feed is not current intelligence."
+  "status": "active",
+  "retrievedAt": "2026-11-17T16:05:42.157Z",
+  "observations": [
+    {
+      "id": "treasury-total-debt",
+      "label": "U.S. total public debt outstanding",
+      "sourceName": "U.S. Treasury FiscalData",
+      "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+      "observationDate": "2026-11-13",
+      "value": 40.6167,
+      "unit": "USD trillions",
+      "previousValue": 40.6085,
+      "changePct": 0.0201,
+      "indicator": "tot_pub_debt_out_amt"
+    },
+    {
+      "id": "treasury-held-public",
+      "label": "U.S. federal debt held by the public",
+      "sourceName": "U.S. Treasury FiscalData",
+      "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+      "observationDate": "2026-11-13",
+      "value": 32.8253,
+      "unit": "USD trillions",
+      "previousValue": 32.8244,
+      "changePct": 0.0029,
+      "indicator": "debt_held_public_amt"
+    },
+    {
+      "id": "usgs-quake-count",
+      "label": "M4.5+ earthquakes in rolling 24 hours",
+      "sourceName": "U.S. Geological Survey",
+      "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
+      "observationDate": "2026-11-17",
+      "value": 13,
+      "unit": "events",
+      "indicator": "earthquakes_day"
+    },
+    {
+      "id": "usgs-largest-quake",
+      "label": "Largest M4.5+ event in rolling 24 hours",
+      "sourceName": "U.S. Geological Survey",
+      "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
+      "observationDate": "2026-11-17",
+      "value": 6.6,
+      "unit": "magnitude",
+      "indicator": "earthquakes_day_max"
+    }
+  ],
+  "notice": "Official dated observations. Treasury debt stock is not the current market yield. USGS earthquake observations do not predict damage, politics, or asset prices. No predictive probability is generated."
 }
