@@ -1,0 +1,11 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {normalizeTreasury,normalizeUSGS,buildFeed} from "../scripts/official-normalizers.mjs";
+import {validatePublicIntel} from "../scripts/public-intel-schema.mjs";
+const at=new Date("2026-11-17T15:00:00Z");
+const debt={data:[{record_date:"2026-11-13",tot_pub_debt_out_amt:"40616678827092.07",debt_held_public_amt:"32825322014326.67"},{record_date:"2026-11-12",tot_pub_debt_out_amt:"40608506856903.25",debt_held_public_amt:"32824386143424.80"}]};
+const quake={type:"FeatureCollection",metadata:{generated:new Date("2026-11-17T14:55:00Z").getTime()},features:[{properties:{mag:5.2,time:new Date("2026-11-17T12:00:00Z").getTime()}},{properties:{mag:4.6,time:new Date("2026-11-16T18:00:00Z").getTime()}}]};
+test("Treasury date, units and changes are correctly normalized",()=>{const a=normalizeTreasury(debt,at);assert.equal(a.length,2);assert.equal(a[0].value,40.6167);assert.equal(a[0].observationDate,"2026-11-13");assert.ok(a[0].changePct>0);});
+test("USGS quake count and maximum magnitude are source-backed",()=>{const a=normalizeUSGS(quake,at);assert.equal(a[0].value,2);assert.equal(a[1].value,5.2);});
+test("stale and invalid official source records fail closed",()=>{assert.throws(()=>normalizeTreasury(debt,new Date("2027-01-01T00:00:00Z")),/old/);assert.throws(()=>normalizeUSGS({...quake,metadata:{generated:0}},at),/timestamp/);assert.throws(()=>normalizeUSGS({...quake,features:[{properties:{mag:1,time:0}}]},at),/records/);});
+test("complete public-only feed passes strict publication schema",()=>{const x=buildFeed(debt,quake,at);assert.equal(x.status,"active");assert.equal(x.observations.length,4);assert.deepEqual(validatePublicIntel(x),[]);});
