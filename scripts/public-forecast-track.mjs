@@ -26,7 +26,7 @@ export function validatePublicTrack(data){
   if(typeof r.createdAt!=="string"||!Number.isFinite(Date.parse(r.createdAt)))issues.push("Invalid pre-commit timestamp "+i);
   const b=r.binding;
   if(validateThresholdBinding(b))issues.push("Invalid original binding "+i);
-  if(b&&(!ELIGIBLE_IDS.has(b.seriesId)||r.id!==expectedId(r.cohort,b.seriesId,Number.parseInt(r.id.slice(-3),10))||r.question!==thresholdQuestion(b)))issues.push("Source identity / question mismatch "+i);
+  if(b&&(!ELIGIBLE_IDS.has(b.seriesId)||![7,14].some(h=>r.id===expectedId(r.cohort,b.seriesId,h))||r.question!==thresholdQuestion(b)))issues.push("Source identity / question mismatch "+i);
   if(b&&(!r.modelCalls||r.modelCalls.persistence!==b.persistenceCall||![0,1].includes(r.modelCalls.rollingMean7)))issues.push("Original deterministic baseline calls are inconsistent "+i);
   if(typeof r.sourceName!=="string"||!r.sourceName||typeof r.sourceRetrievedAt!=="string"||!Number.isFinite(Date.parse(r.sourceRetrievedAt)))issues.push("Source provenance missing "+i);
   if(!["open","resolved","unresolved-missing-data"].includes(r.status))issues.push("Unknown outcome state "+i);
