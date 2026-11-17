@@ -42,8 +42,8 @@ root.innerHTML=({command:renderCommand,watch:renderWatch,forecast:renderForecast
 }finally{rendering=false;}}
 
 function publicIntelPanel(){
- const d=publicIntel,ready=d.status==="active",age=ready&&d.retrievedAt?((Date.now()-new Date(d.retrievedAt).getTime())/3600000):null;
- const stale=age===null||!Number.isFinite(age)||age>48;
+ const d=publicIntel,ready=["active","stale"].includes(d.status),age=ready&&d.retrievedAt?((Date.now()-new Date(d.retrievedAt).getTime())/3600000):null;
+ const stale=d.status==="stale"||age===null||!Number.isFinite(age)||age>48;
  const status=d.status==="loading"?"LOADING":d.status==="unavailable"?"UNAVAILABLE":!ready?"NOT CONFIGURED":stale?"STALE SNAPSHOT":"PUBLIC DATA SNAPSHOT";
  const observations=Array.isArray(d.observations)?d.observations.slice(0,8):[];
  return '<section class="panel mt"><div class="panel-title"><h2>Public intelligence spine</h2>'+tag(status,ready&&!stale?"green":"amber")+'</div>'+
