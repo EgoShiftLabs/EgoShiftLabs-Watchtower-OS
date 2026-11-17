@@ -243,7 +243,7 @@ function thresholdResolutionForm(id){
   '<p>Under the PRE-RECORDED rule, the result is <b>'+esc(result.outcome?"YES":"NO")+'</b>. Verify the source before locking.</p></div>'+
   '<p class="small mt"><a class="text-link" target="_blank" rel="noopener noreferrer" href="'+esc(safeUrl(result.sourceUrl))+'">View original published source ↗</a></p>'+
   '<form id="thresholdResolutionForm" data-id="'+esc(id)+'"><label class="check-option"><input type="checkbox" name="reviewed" required> I reviewed the dated official observation and confirm this rule-driven outcome.</label><div class="form-foot">'+btn("Cancel","close-modal")+'<button type="submit" class="btn btn-primary">Lock verified outcome</button></div></form>'
- :note(esc(result.reason||result.error||"Official time series currently unavailable. This forecast stays open."),"warning")+
+ :note(esc(result.reason||result.error||"Official time series currently unavailable. This forecast stays open."),"warning"))+
  '<div class="form-foot">'+btn("Close","close-modal")+'</div>');
 }
 function saveThresholdResolution(form){
