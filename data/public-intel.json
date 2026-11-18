@@ -1,7 +1,7 @@
 {
   "schema": "watchtower-public-intel-v1",
   "status": "active",
-  "retrievedAt": "2026-11-17T23:30:23.583Z",
+  "retrievedAt": "2026-11-18T13:01:35.011Z",
   "observations": [
     {
       "id": "treasury-total-debt",
@@ -32,8 +32,8 @@
       "label": "M4.5+ earthquakes in rolling 24 hours",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "observationDate": "2026-11-17",
-      "value": 11,
+      "observationDate": "2026-11-18",
+      "value": 18,
       "unit": "events",
       "indicator": "earthquakes_day"
     },
@@ -42,8 +42,8 @@
       "label": "Largest M4.5+ event in rolling 24 hours",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "observationDate": "2026-11-17",
-      "value": 5.2,
+      "observationDate": "2026-11-18",
+      "value": 5.9,
       "unit": "magnitude",
       "indicator": "earthquakes_day_max"
     }
