@@ -1,18 +1,18 @@
 {
   "schema": "watchtower-public-intel-v1",
   "status": "active",
-  "retrievedAt": "2026-11-18T13:01:35.011Z",
+  "retrievedAt": "2026-11-18T22:56:38.186Z",
   "observations": [
     {
       "id": "treasury-total-debt",
       "label": "U.S. total public debt outstanding",
       "sourceName": "U.S. Treasury FiscalData",
       "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
-      "observationDate": "2026-11-16",
-      "value": 40.6624,
+      "observationDate": "2026-11-17",
+      "value": 40.7149,
       "unit": "USD trillions",
-      "previousValue": 40.6167,
-      "changePct": 0.1126,
+      "previousValue": 40.6624,
+      "changePct": 0.1292,
       "indicator": "tot_pub_debt_out_amt"
     },
     {
@@ -20,11 +20,11 @@
       "label": "U.S. federal debt held by the public",
       "sourceName": "U.S. Treasury FiscalData",
       "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
-      "observationDate": "2026-11-16",
-      "value": 32.8529,
+      "observationDate": "2026-11-17",
+      "value": 32.887,
       "unit": "USD trillions",
-      "previousValue": 32.8253,
-      "changePct": 0.084,
+      "previousValue": 32.8529,
+      "changePct": 0.1039,
       "indicator": "debt_held_public_amt"
     },
     {
@@ -33,7 +33,7 @@
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
       "observationDate": "2026-11-18",
-      "value": 18,
+      "value": 20,
       "unit": "events",
       "indicator": "earthquakes_day"
     },
@@ -43,7 +43,7 @@
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
       "observationDate": "2026-11-18",
-      "value": 5.9,
+      "value": 6.1,
       "unit": "magnitude",
       "indicator": "earthquakes_day_max"
     }
