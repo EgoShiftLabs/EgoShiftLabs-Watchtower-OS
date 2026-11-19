@@ -1,6 +1,6 @@
 {
   "schema": "watchtower-chief-brief-v1",
-  "generatedAt": "2026-11-18T22:56:38.186Z",
+  "generatedAt": "2026-11-19T13:01:59.571Z",
   "status": "public-only",
   "title": "CHIEF Public Intelligence Digest",
   "items": [
@@ -27,17 +27,17 @@
     {
       "id": "usgs-quake-count",
       "title": "M4.5+ earthquakes in rolling 24 hours",
-      "observationDate": "2026-11-18",
+      "observationDate": "2026-11-19",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "finding": "20 events",
+      "finding": "14 events",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     },
     {
       "id": "usgs-largest-quake",
       "title": "Largest M4.5+ event in rolling 24 hours",
-      "observationDate": "2026-11-18",
+      "observationDate": "2026-11-19",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
       "finding": "6.1 magnitude",
