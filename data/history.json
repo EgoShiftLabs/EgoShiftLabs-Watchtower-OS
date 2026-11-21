@@ -1,7 +1,7 @@
 {
   "schema": "watchtower-history-v1",
   "status": "active",
-  "retrievedAt": "2026-11-20T22:40:11.994Z",
+  "retrievedAt": "2026-11-21T12:37:20.108Z",
   "series": [
     {
       "id": "treasury-total-debt",
