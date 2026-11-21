@@ -1,7 +1,7 @@
 {
   "schema": "watchtower-public-intel-v1",
   "status": "active",
-  "retrievedAt": "2026-11-21T12:37:20.108Z",
+  "retrievedAt": "2026-11-21T21:38:31.223Z",
   "observations": [
     {
       "id": "treasury-total-debt",
@@ -33,7 +33,7 @@
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
       "observationDate": "2026-11-21",
-      "value": 13,
+      "value": 14,
       "unit": "events",
       "indicator": "earthquakes_day"
     },
