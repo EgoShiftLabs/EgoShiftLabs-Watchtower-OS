@@ -121,8 +121,128 @@
       },
       "status": "open",
       "resolution": null
+    },
+    {
+      "id": "2026-11-23-treasury-total-debt-7d",
+      "cohort": "2026-11-23",
+      "createdAt": "2026-11-23T14:36:23.201Z",
+      "kind": "deterministic-public-baselines",
+      "policy": "weekly-two-horizons-v1",
+      "question": "Will U.S. total public debt outstanding be at or above 40.7097807 USD trillions on the first recorded observation on or after 2026-11-30?",
+      "sourceName": "U.S. Treasury FiscalData",
+      "sourceRetrievedAt": "2026-11-23T14:36:22.524Z",
+      "binding": {
+        "schema": "watchtower-threshold-v1",
+        "seriesId": "treasury-total-debt",
+        "seriesLabel": "U.S. total public debt outstanding",
+        "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+        "unit": "USD trillions",
+        "originalObservationDate": "2026-11-19",
+        "originalValue": 40.7097807,
+        "targetDate": "2026-11-30",
+        "threshold": 40.7097807,
+        "comparator": "gte",
+        "persistenceCall": 1,
+        "rule": "first-observation-on-or-after-target-within-7-calendar-days"
+      },
+      "modelCalls": {
+        "persistence": 1,
+        "rollingMean7": 0
+      },
+      "status": "open",
+      "resolution": null
+    },
+    {
+      "id": "2026-11-23-treasury-total-debt-14d",
+      "cohort": "2026-11-23",
+      "createdAt": "2026-11-23T14:36:23.201Z",
+      "kind": "deterministic-public-baselines",
+      "policy": "weekly-two-horizons-v1",
+      "question": "Will U.S. total public debt outstanding be at or above 40.7504904807 USD trillions on the first recorded observation on or after 2026-12-07?",
+      "sourceName": "U.S. Treasury FiscalData",
+      "sourceRetrievedAt": "2026-11-23T14:36:22.524Z",
+      "binding": {
+        "schema": "watchtower-threshold-v1",
+        "seriesId": "treasury-total-debt",
+        "seriesLabel": "U.S. total public debt outstanding",
+        "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+        "unit": "USD trillions",
+        "originalObservationDate": "2026-11-19",
+        "originalValue": 40.7097807,
+        "targetDate": "2026-12-07",
+        "threshold": 40.7504904807,
+        "comparator": "gte",
+        "persistenceCall": 0,
+        "rule": "first-observation-on-or-after-target-within-7-calendar-days"
+      },
+      "modelCalls": {
+        "persistence": 0,
+        "rollingMean7": 0
+      },
+      "status": "open",
+      "resolution": null
+    },
+    {
+      "id": "2026-11-23-treasury-held-public-7d",
+      "cohort": "2026-11-23",
+      "createdAt": "2026-11-23T14:36:23.201Z",
+      "kind": "deterministic-public-baselines",
+      "policy": "weekly-two-horizons-v1",
+      "question": "Will Federal debt held by public be at or above 32.90146 USD trillions on the first recorded observation on or after 2026-11-30?",
+      "sourceName": "U.S. Treasury FiscalData",
+      "sourceRetrievedAt": "2026-11-23T14:36:22.524Z",
+      "binding": {
+        "schema": "watchtower-threshold-v1",
+        "seriesId": "treasury-held-public",
+        "seriesLabel": "Federal debt held by public",
+        "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+        "unit": "USD trillions",
+        "originalObservationDate": "2026-11-19",
+        "originalValue": 32.90146,
+        "targetDate": "2026-11-30",
+        "threshold": 32.90146,
+        "comparator": "gte",
+        "persistenceCall": 1,
+        "rule": "first-observation-on-or-after-target-within-7-calendar-days"
+      },
+      "modelCalls": {
+        "persistence": 1,
+        "rollingMean7": 0
+      },
+      "status": "open",
+      "resolution": null
+    },
+    {
+      "id": "2026-11-23-treasury-held-public-14d",
+      "cohort": "2026-11-23",
+      "createdAt": "2026-11-23T14:36:23.201Z",
+      "kind": "deterministic-public-baselines",
+      "policy": "weekly-two-horizons-v1",
+      "question": "Will Federal debt held by public be at or above 32.93436146 USD trillions on the first recorded observation on or after 2026-12-07?",
+      "sourceName": "U.S. Treasury FiscalData",
+      "sourceRetrievedAt": "2026-11-23T14:36:22.524Z",
+      "binding": {
+        "schema": "watchtower-threshold-v1",
+        "seriesId": "treasury-held-public",
+        "seriesLabel": "Federal debt held by public",
+        "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+        "unit": "USD trillions",
+        "originalObservationDate": "2026-11-19",
+        "originalValue": 32.90146,
+        "targetDate": "2026-12-07",
+        "threshold": 32.93436146,
+        "comparator": "gte",
+        "persistenceCall": 0,
+        "rule": "first-observation-on-or-after-target-within-7-calendar-days"
+      },
+      "modelCalls": {
+        "persistence": 0,
+        "rollingMean7": 0
+      },
+      "status": "open",
+      "resolution": null
     }
   ],
-  "updatedAt": "2026-11-17T17:35:00.547Z",
+  "updatedAt": "2026-11-23T14:36:23.201Z",
   "notice": "Public research baseline predictions only. No human probabilities or personalized records. Future outcomes remain unknown until a qualifying original observation is published."
 }
