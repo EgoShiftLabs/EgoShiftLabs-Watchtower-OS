@@ -1,7 +1,7 @@
 {
   "schema": "watchtower-public-intel-v1",
   "status": "active",
-  "retrievedAt": "2026-11-24T02:53:50.695Z",
+  "retrievedAt": "2026-11-24T14:51:29.326Z",
   "observations": [
     {
       "id": "treasury-total-debt",
@@ -33,7 +33,7 @@
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
       "observationDate": "2026-11-24",
-      "value": 15,
+      "value": 8,
       "unit": "events",
       "indicator": "earthquakes_day"
     },
@@ -43,7 +43,7 @@
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
       "observationDate": "2026-11-24",
-      "value": 5.5,
+      "value": 6.4,
       "unit": "magnitude",
       "indicator": "earthquakes_day_max"
     }
