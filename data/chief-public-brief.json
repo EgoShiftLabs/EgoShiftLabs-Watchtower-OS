@@ -1,6 +1,6 @@
 {
   "schema": "watchtower-chief-brief-v1",
-  "generatedAt": "2026-11-25T00:43:06.897Z",
+  "generatedAt": "2026-11-25T14:19:34.396Z",
   "status": "public-only",
   "title": "CHIEF Public Intelligence Digest",
   "items": [
@@ -40,7 +40,7 @@
       "observationDate": "2026-11-25",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "finding": "6.4 magnitude",
+      "finding": "5.9 magnitude",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     }
