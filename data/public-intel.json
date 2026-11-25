@@ -1,18 +1,18 @@
 {
   "schema": "watchtower-public-intel-v1",
   "status": "active",
-  "retrievedAt": "2026-11-24T14:51:29.326Z",
+  "retrievedAt": "2026-11-25T00:43:06.897Z",
   "observations": [
     {
       "id": "treasury-total-debt",
       "label": "U.S. total public debt outstanding",
       "sourceName": "U.S. Treasury FiscalData",
       "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
-      "observationDate": "2026-11-20",
-      "value": 40.7104,
+      "observationDate": "2026-11-23",
+      "value": 40.7274,
       "unit": "USD trillions",
-      "previousValue": 40.7098,
-      "changePct": 0.0016,
+      "previousValue": 40.7104,
+      "changePct": 0.0416,
       "indicator": "tot_pub_debt_out_amt"
     },
     {
@@ -20,11 +20,11 @@
       "label": "U.S. federal debt held by the public",
       "sourceName": "U.S. Treasury FiscalData",
       "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
-      "observationDate": "2026-11-20",
-      "value": 32.9012,
+      "observationDate": "2026-11-23",
+      "value": 32.9025,
       "unit": "USD trillions",
-      "previousValue": 32.9015,
-      "changePct": -0.0008,
+      "previousValue": 32.9012,
+      "changePct": 0.0038,
       "indicator": "debt_held_public_amt"
     },
     {
@@ -32,8 +32,8 @@
       "label": "M4.5+ earthquakes in rolling 24 hours",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "observationDate": "2026-11-24",
-      "value": 8,
+      "observationDate": "2026-11-25",
+      "value": 10,
       "unit": "events",
       "indicator": "earthquakes_day"
     },
@@ -42,7 +42,7 @@
       "label": "Largest M4.5+ event in rolling 24 hours",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "observationDate": "2026-11-24",
+      "observationDate": "2026-11-25",
       "value": 6.4,
       "unit": "magnitude",
       "indicator": "earthquakes_day_max"
