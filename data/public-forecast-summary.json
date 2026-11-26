@@ -1,13 +1,16 @@
 {
   "schema": "watchtower-public-track-summary-v1",
   "policy": "weekly-two-horizons-v1",
-  "generatedAt": "2026-11-25T14:19:34.905Z",
+  "generatedAt": "2026-11-26T13:52:32.131Z",
   "created": 8,
-  "open": 8,
-  "resolved": 0,
+  "open": 6,
+  "resolved": 2,
   "unresolvedMissingData": 0,
-  "evaluated": 0,
-  "accuracy": null,
+  "evaluated": 2,
+  "accuracy": {
+    "persistence": 1,
+    "rollingMean7": 0
+  },
   "recentRecords": [
     {
       "id": "2026-11-23-treasury-held-public-14d",
@@ -116,12 +119,12 @@
       "threshold": 32.825322,
       "unit": "USD trillions",
       "targetDate": "2026-11-24",
-      "status": "open",
+      "status": "resolved",
       "persistenceCall": 1,
       "rollingMeanCall": 0,
-      "outcome": null,
-      "outcomeObservationDate": null,
-      "outcomeValue": null
+      "outcome": 1,
+      "outcomeObservationDate": "2026-11-24",
+      "outcomeValue": 32.9531257
     },
     {
       "id": "2026-11-16-treasury-total-debt-14d",
@@ -154,12 +157,12 @@
       "threshold": 40.6166788,
       "unit": "USD trillions",
       "targetDate": "2026-11-24",
-      "status": "open",
+      "status": "resolved",
       "persistenceCall": 1,
       "rollingMeanCall": 0,
-      "outcome": null,
-      "outcomeObservationDate": null,
-      "outcomeValue": null
+      "outcome": 1,
+      "outcomeObservationDate": "2026-11-24",
+      "outcomeValue": 40.7933057
     }
   ],
   "notice": "Real official-data precommitments; binary deterministic persistence/rolling-mean calls only. No human estimates, no calibrated odds, no model skill claim. Questions share sources, so raw n is not independent."

@@ -29,8 +29,16 @@
         "persistence": 1,
         "rollingMean7": 0
       },
-      "status": "open",
-      "resolution": null
+      "status": "resolved",
+      "resolution": {
+        "outcome": 1,
+        "value": 40.7933057,
+        "observationDate": "2026-11-24",
+        "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+        "resolvedAt": "2026-11-26T13:52:32.131Z",
+        "persistenceCorrect": 1,
+        "rollingMeanCorrect": 0
+      }
     },
     {
       "id": "2026-11-16-treasury-total-debt-14d",
@@ -89,8 +97,16 @@
         "persistence": 1,
         "rollingMean7": 0
       },
-      "status": "open",
-      "resolution": null
+      "status": "resolved",
+      "resolution": {
+        "outcome": 1,
+        "value": 32.9531257,
+        "observationDate": "2026-11-24",
+        "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
+        "resolvedAt": "2026-11-26T13:52:32.131Z",
+        "persistenceCorrect": 1,
+        "rollingMeanCorrect": 0
+      }
     },
     {
       "id": "2026-11-16-treasury-held-public-14d",
@@ -243,6 +259,6 @@
       "resolution": null
     }
   ],
-  "updatedAt": "2026-11-23T14:36:23.201Z",
+  "updatedAt": "2026-11-26T13:52:32.131Z",
   "notice": "Public research baseline predictions only. No human probabilities or personalized records. Future outcomes remain unknown until a qualifying original observation is published."
 }
