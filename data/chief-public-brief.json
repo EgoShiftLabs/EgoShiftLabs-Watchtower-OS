@@ -1,46 +1,46 @@
 {
   "schema": "watchtower-chief-brief-v1",
-  "generatedAt": "2026-11-27T13:50:14.934Z",
+  "generatedAt": "2026-11-28T00:02:04.611Z",
   "status": "public-only",
   "title": "CHIEF Public Intelligence Digest",
   "items": [
     {
       "id": "treasury-total-debt",
       "title": "U.S. total public debt outstanding",
-      "observationDate": "2026-11-24",
+      "observationDate": "2026-11-25",
       "sourceName": "U.S. Treasury FiscalData",
       "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
-      "finding": "40.7933 USD trillions; 0.1619% higher than the preceding published record",
+      "finding": "40.7707 USD trillions; 0.0554% lower than the preceding published record",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     },
     {
       "id": "treasury-held-public",
       "title": "U.S. federal debt held by the public",
-      "observationDate": "2026-11-24",
+      "observationDate": "2026-11-25",
       "sourceName": "U.S. Treasury FiscalData",
       "sourceUrl": "https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny",
-      "finding": "32.9531 USD trillions; 0.1540% higher than the preceding published record",
+      "finding": "32.9547 USD trillions; 0.0049% higher than the preceding published record",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     },
     {
       "id": "usgs-quake-count",
       "title": "M4.5+ earthquakes in rolling 24 hours",
-      "observationDate": "2026-11-27",
+      "observationDate": "2026-11-28",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "finding": "9 events",
+      "finding": "7 events",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     },
     {
       "id": "usgs-largest-quake",
       "title": "Largest M4.5+ event in rolling 24 hours",
-      "observationDate": "2026-11-27",
+      "observationDate": "2026-11-28",
       "sourceName": "U.S. Geological Survey",
       "sourceUrl": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
-      "finding": "5.7 magnitude",
+      "finding": "5.1 magnitude",
       "type": "observed",
       "confidence": "Official source; observation does not imply a causal mechanism."
     }
@@ -49,9 +49,9 @@
     {
       "id": "treasury-total-debt",
       "historyCount": 140,
-      "observationDate": "2026-11-24",
-      "persistenceMae": 0.026847546923076494,
-      "rollingMae": 0.058329026043956136,
+      "observationDate": "2026-11-25",
+      "persistenceMae": 0.026858946923076516,
+      "rollingMae": 0.05824956406593409,
       "window": 7,
       "evaluationCount": 130,
       "unit": "USD trillions"
@@ -59,9 +59,9 @@
     {
       "id": "treasury-held-public",
       "historyCount": 140,
-      "observationDate": "2026-11-24",
-      "persistenceMae": 0.017481571538461436,
-      "rollingMae": 0.054159388021978186,
+      "observationDate": "2026-11-25",
+      "persistenceMae": 0.017493105384615286,
+      "rollingMae": 0.05411056912087931,
       "window": 7,
       "evaluationCount": 130,
       "unit": "USD trillions"

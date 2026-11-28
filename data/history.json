@@ -1,7 +1,7 @@
 {
   "schema": "watchtower-history-v1",
   "status": "active",
-  "retrievedAt": "2026-11-27T13:50:14.934Z",
+  "retrievedAt": "2026-11-28T00:02:04.611Z",
   "series": [
     {
       "id": "treasury-total-debt",
@@ -12,10 +12,6 @@
       "frequency": "business-day",
       "method": "Original public debt STOCK; not market interest yield",
       "points": [
-        {
-          "date": "2026-05-06",
-          "value": 38.9188379
-        },
         {
           "date": "2026-05-07",
           "value": 38.9316517
@@ -571,6 +567,10 @@
         {
           "date": "2026-11-24",
           "value": 40.7933057
+        },
+        {
+          "date": "2026-11-25",
+          "value": 40.770711
         }
       ]
     },
@@ -583,10 +583,6 @@
       "frequency": "business-day",
       "method": "Original public debt STOCK; not market interest yield",
       "points": [
-        {
-          "date": "2026-05-06",
-          "value": 31.2633838
-        },
         {
           "date": "2026-05-07",
           "value": 31.2623256
@@ -1142,6 +1138,10 @@
         {
           "date": "2026-11-24",
           "value": 32.9531257
+        },
+        {
+          "date": "2026-11-25",
+          "value": 32.9547406
         }
       ]
     }
